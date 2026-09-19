@@ -1,4 +1,4 @@
-// Deterministic demo library — mirrors Stock_Template.csv shape (45 days × 2 plants).
+// Deterministic demo library — mirrors Stock_Template.csv shape (45 days × 1 plant: Sangamner only).
 import { f2 } from "../lib/warehouse";
 
 const ARTS = [
@@ -19,7 +19,7 @@ const ARTS = [
 ];
 
 export function genDemo() {
-  const plants = ["Sangamner", "Mumbai"];
+  const plants = ["Sangamner"];
   const out = [];
   let seed = 7;
   const rnd = () => {

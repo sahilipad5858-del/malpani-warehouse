@@ -124,7 +124,7 @@ export default function App() {
       const demo = genDemo();
       setRecords(demo);
       setMeta({ source: "demo", isDemo: true, at: new Date().toLocaleString() });
-      setFeed([{ t: new Date().toLocaleString(), msg: `Loaded demo library — ${demo.length.toLocaleString("en-IN")} daily rows (2 plants × 14 articles × 45 days). Import your Excel to replace.` }]);
+      setFeed([{ t: new Date().toLocaleString(), msg: `Loaded demo library — ${demo.length.toLocaleString("en-IN")} daily rows (1 plant × 14 articles × 45 days). Import your Excel to replace.` }]);
     }
   }, []);
 
@@ -254,12 +254,13 @@ export default function App() {
       showToast("No data rows found in that file.");
       return;
     }
-    if (uploadMode === "replace") {
+    const replacingDemo = meta.isDemo && records.length > 0;
+    if (uploadMode === "replace" || replacingDemo) {
       const m = { source: "excel", fileName, at: new Date().toLocaleString(), added: incoming.length, updated: 0, isDemo: false };
       persist(incoming, m);
       setLiveDelta({});
-      setFeed((f) => [{ t: new Date().toLocaleString(), msg: `Replace import · ${fileName} — ${incoming.length.toLocaleString("en-IN")} rows loaded.` }, ...f]);
-      showToast(`Loaded ${incoming.length} rows (replace).`);
+      setFeed((f) => [{ t: new Date().toLocaleString(), msg: replacingDemo ? `First import · ${fileName} — demo data discarded, ${incoming.length.toLocaleString("en-IN")} rows loaded.` : `Replace import · ${fileName} — ${incoming.length.toLocaleString("en-IN")} rows loaded.` }, ...f]);
+      showToast(replacingDemo ? `Demo replaced: ${incoming.length} rows loaded.` : `Loaded ${incoming.length} rows (replace).`);
     } else {
       const { merged, added, updated } = mergeRecords(records, incoming);
       const m = { source: "excel", fileName, at: new Date().toLocaleString(), added, updated, isDemo: false };
@@ -403,7 +404,7 @@ export default function App() {
             </div>
 
             <div className="mt-auto pt-6 text-[11px] leading-relaxed text-slate-400">
-              Sangamner · Mumbai<br />Stock_Template.csv compatible
+              Sangamner<br />Stock_Template.csv compatible
             </div>
           </div>
         </aside>
