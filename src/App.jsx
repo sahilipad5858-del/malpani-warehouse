@@ -375,17 +375,20 @@ export default function App() {
               ))}
             </nav>
 
-            <div className="mt-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">Apps — one site</div>
+            <div className="mt-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">Apps — single page</div>
             <nav className="mt-2 flex flex-col gap-1">
-              <span className="rounded-xl bg-slate-100 px-3.5 py-2.5 text-left text-[13.5px] font-semibold text-slate-900 dark:bg-slate-800 dark:text-white">
-                🏭 Warehouse ★ you are here
-              </span>
-              <a
-                href="./purchase.html"
-                className="rounded-xl px-3.5 py-2.5 text-left text-[13.5px] font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              <button
+                onClick={() => { setView("overview"); setSideOpen(false); }}
+                className={`rounded-xl px-3.5 py-2.5 text-left text-[13.5px] font-semibold transition ${view !== "purchase" ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+              >
+                🏭 Warehouse
+              </button>
+              <button
+                onClick={() => { setView("purchase"); setSideOpen(false); }}
+                className={`rounded-xl px-3.5 py-2.5 text-left text-[13.5px] font-semibold transition ${view === "purchase" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
               >
                 🛒 Purchase Dashboard
-              </a>
+              </button>
             </nav>
 
             <div className="mt-6 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-4 text-white shadow-lg">
@@ -408,23 +411,32 @@ export default function App() {
 
         {/* ---------- main ---------- */}
         <div className="print-full mx-auto w-full max-w-[1280px] flex-1 px-4 pb-16 pt-4 sm:px-6">
-          {/* header */}
+          {/* header — single webpage shell; warehouse search/live hidden on Purchase tab */}
           <header className="no-print flex flex-wrap items-center gap-3">
             <button onClick={() => setSideOpen(true)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-slate-700 dark:bg-slate-900 lg:hidden">☰</button>
+            {view !== "purchase" && (
             <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <span className="text-slate-400">⌕</span>
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search article / plant / code — e.g. Elaichi, Sangamner" className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-slate-400" />
             </div>
+            )}
+            {view === "purchase" && (
+            <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-2xl border border-emerald-600/40 bg-emerald-50 px-3.5 py-2.5 text-[13px] font-semibold text-emerald-800 dark:bg-slate-900 dark:text-emerald-200">
+              Single page · use search inside the Purchase frame below
+            </div>
+            )}
             <button onClick={() => setDark(!dark)} title="Toggle dark mode" className="rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold shadow-sm dark:border-slate-700 dark:bg-slate-900">
               {dark ? "☀ Light" : "◑ Dark"}
             </button>
+            {view !== "purchase" && (
             <button onClick={() => { setLive(!live); if (!live) showToast("Live simulation ON — consumption ticks every 4s."); }} className={`flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${live ? "bg-red-600 text-white" : "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"}`}>
               <span className={`live-dot inline-block h-2 w-2 rounded-full ${live ? "bg-white" : "bg-red-500"}`} />
               {live ? "Live ON" : "Go Live"}
             </button>
-            <a href="./purchase.html" title="Open Purchase Dashboard (same site)" className="rounded-2xl border border-emerald-600 bg-white px-3.5 py-2.5 text-sm font-bold text-emerald-700 shadow-sm hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300">
+            )}
+            <button onClick={() => setView("purchase")} title="Open Purchase Dashboard in the same page" className={`rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${view === "purchase" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white" : "border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"}`}>
               🛒 Purchase
-            </a>
+            </button>
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[13px] font-bold text-white">MT</div>
               <div className="hidden sm:block">
@@ -434,7 +446,23 @@ export default function App() {
             </div>
           </header>
 
-          {/* title + actions */}
+          {/* title + actions — single webpage: Purchase renders inside the same page */}
+          {view === "purchase" ? (
+            <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h1 className="bg-gradient-to-r from-emerald-600 via-teal-600 to-violet-600 bg-clip-text text-2xl font-extrabold text-transparent sm:text-[28px] dark:from-emerald-300 dark:via-teal-200 dark:to-violet-300">
+                  Purchase Dashboard
+                </h1>
+                <p className="mt-1 text-[12.5px] text-slate-500 dark:text-slate-400">
+                  Same page · PO follow-ups, status updates & ERP import — data stays separate from warehouse stock
+                </p>
+              </div>
+              <div className="no-print flex flex-wrap items-center gap-2">
+                <a href="./purchase.html" target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-600 hover:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">Open full page</a>
+                <button onClick={() => setView("overview")} className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-md">🏭 Back to Warehouse</button>
+              </div>
+            </div>
+          ) : (
           <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <h1 className="bg-gradient-to-r from-emerald-600 via-teal-600 to-violet-600 bg-clip-text text-2xl font-extrabold text-transparent sm:text-[28px] dark:from-emerald-300 dark:via-teal-200 dark:to-violet-300">
@@ -454,6 +482,7 @@ export default function App() {
               <button onClick={exportPlanCSV} className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-md">⇪ Export Plan</button>
             </div>
           </div>
+          )}
           <input ref={fileRef} type="file" accept=".csv,.txt,.tsv,.xlsx,.xls" multiple className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
 
           {/* preset chips */}
@@ -468,6 +497,16 @@ export default function App() {
           )}
 
           {view === "help" && <HelpView onTemplate={downloadTemplate} />}
+
+          {view === "purchase" && (
+            <section className="mt-4 overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900">
+              <iframe
+                src="./purchase.html?embed=1"
+                title="Purchase Dashboard — same page"
+                style={{ width: "100%", height: "calc(100vh - 220px)", minHeight: 640, border: 0, display: "block", background: "#F5F7F5" }}
+              />
+            </section>
+          )}
 
           {view === "activity" && (
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
