@@ -264,11 +264,21 @@ export default function App() {
         if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
           const buf = await f.arrayBuffer();
           const wb = XLSX.read(buf, { type: "array" });
-          const ws = wb.Sheets[wb.SheetNames[0]];
-          const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-          const { records: recs, error } = gridToRecords(grid);
-          if (error) showToast(error);
-          else applyIncoming(recs, f.name);
+          // Try every sheet — SAP exports often put cover/title on sheet 1
+          // and real data on sheet 2. Pick the sheet yielding most records.
+          let bestRecs = null, bestError = "", bestSheet = wb.SheetNames[0];
+          for (const sn of wb.SheetNames) {
+            const ws = wb.Sheets[sn];
+            const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+            if (!grid || !grid.length) continue;
+            const { records: recs, error } = gridToRecords(grid);
+            if (!error && recs && recs.length && (!bestRecs || recs.length > bestRecs.length)) {
+              bestRecs = recs; bestSheet = sn;
+            }
+            if (!bestError) bestError = error || "";
+          }
+          if (bestRecs) applyIncoming(bestRecs, `${f.name} (${bestSheet})`);
+          else showToast(bestError || `No readable data in ${f.name}. Need: Date | Plant | Article | Closing.`);
         } else {
           const text = await f.text();
           const { records: recs, error } = parseTextFile(text);

@@ -111,17 +111,113 @@ function splitCells(text, d) {
   return rows;
 }
 
-const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+const norm = (s) =>
+  String(s ?? "")
+    .replace(/^\uFEFF/, "")
+    .toLowerCase()
+    .replace(/[._\-/\\()[\]:]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const ARTICLE_NAMES = [
+  "short text", "short descr", "material description", "mat description",
+  "material desc", "mat desc", "article name", "item name", "product name",
+  "material name", "item description", "article description", "stock description",
+  "description", "article", "product", "item", "goods", "commodity",
+  "particular", "particulars", "nomenclature", "name", "material",
+];
+const PLANT_NAMES = [
+  "plant", "plnt", "location", "site", "depot", "warehouse",
+  "godown", "branch", "storage location", "sloc", "division",
+];
+const DATE_NAMES = [
+  "posting date", "document date", "doc date", "stock date",
+  "as on", "on date", "date of stock", "date", "day", "posting",
+];
+const CLOSE_NAMES = [
+  "currant stock qty", "current stock qty", "currant stock", "current stock",
+  "stock qty", "stock quantity", "closing stock", "close stock", "closing qty",
+  "available stock", "total stock", "ending stock", "physical stock",
+  "system stock", "book stock", "in stock", "hand stock", "on hand",
+  "unrestricted", "balance qty", "net stock", "current", "currant",
+  "closing", "balance", "stock", "quantity", "qty", "close", "ending",
+];
+const OPEN_NAMES = ["opening", "open stock", "open qty", "start", "beginning"];
+const REC_NAMES = ["receipt", "inward", "grn", "received", "receipt qty", "purchase qty", "purchase", "in qty"];
+const CONS_NAMES = ["consumption", "consumption qty", "usage", "issue", "issued", "consumed", "dispatch", "dispatched", "sales", "sale", "utilization", "utilisation", "out qty"];
+const UOM_NAMES = ["uom", "oun", "unit", "uom code", "base uom"];
+const CODE_NAMES = ["material code", "article code", "item code", "product code", "material no", "material number", "mat code", "mat no", "code", "sku"];
 
 function findCol(H, names) {
-  for (const n of names) {
-    const i = H.indexOf(n);
-    if (i >= 0) return i;
-  }
+  const clean = names.map(norm).filter(Boolean).sort((a, b) => b.length - a.length);
+  let best = -1, bestScore = -1;
   for (let i = 0; i < H.length; i++) {
-    for (const n of names) {
-      if (H[i].indexOf(n) >= 0) return i;
+    const h = H[i];
+    if (!h) continue;
+    for (const n of clean) {
+      let score = -1;
+      if (h === n) score = 1000 + n.length; // exact header wins
+      else if (h.includes(n)) score = n.length; // longer (more specific) name wins
+      // Skip dangerously-generic short names unless nothing better matches.
+      // e.g. "Item Code" must NOT beat "Item Name" via generic "item".
+      if (score > bestScore) { bestScore = score; best = i; }
+      if (score >= 1000) break; // can't beat exact match in this column
     }
+  }
+  // Reject weak generic-stub matches (score < 4 means only a 1-3 char fragment
+  // matched, e.g. "day" inside "Monday"). Exact matches always score >= 1000.
+  if (best >= 0 && bestScore < 4) return -1;
+  return best;
+}
+
+function headerScore(H) {
+  let s = 0;
+  if (findCol(H, ARTICLE_NAMES) >= 0) s += 3;
+  if (findCol(H, CLOSE_NAMES) >= 0) s += 2;
+  if (findCol(H, DATE_NAMES) >= 0) s += 1;
+  if (findCol(H, PLANT_NAMES) >= 0) s += 1;
+  if (findCol(H, OPEN_NAMES) >= 0) s += 1;
+  if (findCol(H, REC_NAMES) >= 0) s += 1;
+  if (findCol(H, CONS_NAMES) >= 0) s += 1;
+  return s;
+}
+
+function headerLabel(grid, hi) {
+  const row = grid[hi] || [];
+  const txt = row.map((c) => String(c ?? "").trim()).join(" | ").slice(0, 220);
+  return txt || "(blank row)";
+}
+
+// Fallback: column with the most text-like values (for Article when header wording is unknown)
+function guessTextColumn(grid, hi) {
+  const width = Math.max(...grid.slice(hi, hi + 30).map((r) => r.length));
+  let best = -1, bestN = 0;
+  for (let c = 0; c < width; c++) {
+    let n = 0;
+    for (let r = hi + 1; r < Math.min(grid.length, hi + 31); r++) {
+      const v = String(grid[r][c] ?? "").trim();
+      if (v.length < 3) continue;
+      if (parseDate(v)) continue;
+      if (v !== "" && isNaN(Number(v.replace(/,/g, "")))) n++;
+    }
+    if (n > bestN) { bestN = n; best = c; }
+  }
+  return bestN >= 1 ? best : -1;
+}
+
+// Fallback: right-most mostly-numeric column (for Closing when header wording is unknown)
+function guessNumericColumn(grid, hi, skip = new Set()) {
+  const width = Math.max(...grid.slice(hi, hi + 30).map((r) => r.length));
+  for (let c = width - 1; c >= 0; c--) {
+    if (skip.has(c)) continue;
+    let num = 0, total = 0;
+    for (let r = hi + 1; r < Math.min(grid.length, hi + 31); r++) {
+      const v = String(grid[r][c] ?? "").trim();
+      if (!v) continue;
+      total++;
+      if (v === "-" || !isNaN(Number(v.replace(/,/g, "")))) num++;
+    }
+    if (total >= 1 && num / total > 0.6) return c;
   }
   return -1;
 }
@@ -129,12 +225,25 @@ function findCol(H, names) {
 /** Convert a 2D grid (first rows = headers) into stock records. Supports LONG + WIDE. */
 export function gridToRecords(grid) {
   if (!grid || !grid.length) return { error: "Empty sheet — nothing to import." };
-  let hi = -1;
-  for (let i = 0; i < Math.min(15, grid.length); i++) {
-    const j = grid[i].join(" ").toLowerCase();
-    if (j.includes("article") || j.includes("item") || j.includes("material") || j.includes("plant") || j.includes("date") || j.includes("short text")) { hi = i; break; }
+  grid = grid.map((r) => (Array.isArray(r) ? r.map((c) => (c == null ? "" : String(c))) : []));
+  // Score every candidate header row (first 30) — old code stopped at the first
+  // row mentioning plant/date, so title rows like "Plant: Sangamner" were
+  // mistaken for headers and triggered the Article error.
+  let hi = 0, best = -1;
+  const scanN = Math.min(30, grid.length);
+  for (let i = 0; i < scanN; i++) {
+    const H = grid[i].map(norm);
+    if (H.every((h) => !h)) continue;
+    const s = headerScore(H);
+    if (s > best) { best = s; hi = i; }
   }
-  if (hi < 0) hi = 0;
+  if (best <= 0) {
+    // No recognisable header — fall back to first non-blank row so the
+    // error below can show what was actually found.
+    for (let i = 0; i < scanN; i++) {
+      if (grid[i].some((c) => String(c ?? "").trim() !== "")) { hi = i; break; }
+    }
+  }
   const H = grid[hi].map(norm);
 
   // WIDE detection: ≥3 date-like headers
@@ -143,16 +252,19 @@ export function gridToRecords(grid) {
     if (parseDate(grid[hi][i])) dateCols.push(i);
   }
   if (dateCols.length >= 3) {
-    const cArt = findCol(H, ["short text", "description", "article", "product", "item", "material"]);
-    const cPlant = findCol(H, ["plant", "plnt", "location", "site", "depot"]);
-    const cUom = findCol(H, ["uom", "oun", "unit"]);
+    let cArt = findCol(H, ARTICLE_NAMES);
+    if (cArt < 0) cArt = guessTextColumn(grid, hi);
+    const cPlant = findCol(H, PLANT_NAMES);
+    const cUom = findCol(H, UOM_NAMES);
     let cCode = H.indexOf("material");
     if (cCode === cArt) cCode = -1;
-    if (cCode < 0) cCode = findCol(H, ["material code", "article code", "item code", "code", "sku"]);
+    if (cCode < 0) cCode = findCol(H, CODE_NAMES);
+    if (cCode === cArt) cCode = -1;
+    if (cArt < 0) return { error: `Could not find Article/Item column (row ${hi + 1}: ${headerLabel(grid, hi)}). Need: Date | Plant | Article | Closing.` };
     const out = [];
     for (let r = hi + 1; r < grid.length; r++) {
       const row = grid[r];
-      const art = (row[cArt >= 0 ? cArt : 0] || "").trim();
+      const art = (row[cArt] || "").trim();
       if (!art) continue;
       const plant = (cPlant >= 0 ? (row[cPlant] || "").trim() : "Main") || "Main";
       for (const ci of dateCols) {
@@ -171,31 +283,47 @@ export function gridToRecords(grid) {
   }
 
   // LONG format
-  const cDate = findCol(H, ["date", "day", "posting date", "stock date"]);
-  const cPlant = findCol(H, ["plant", "plnt", "location", "site", "depot"]);
-  const cArt = findCol(H, ["short text", "material description", "article name", "item name", "description", "article", "product", "item", "material"]);
+  const cDate = findCol(H, DATE_NAMES);
+  const cPlant = findCol(H, PLANT_NAMES);
+  let cArt = findCol(H, ARTICLE_NAMES);
   let cCode = H.indexOf("material");
   if (cCode === cArt) cCode = -1;
-  if (cCode < 0) cCode = findCol(H, ["material code", "article code", "item code", "code", "sku"]);
-  const cUom = findCol(H, ["uom", "oun", "unit"]);
-  const cOpen = findCol(H, ["opening", "open stock", "start"]);
-  const cRec = findCol(H, ["receipt", "inward", "grn", "received", "purchase qty"]);
-  const cCons = findCol(H, ["consumption", "usage", "issue", "consumed", "dispatch", "sales", "utilization"]);
-  const cClose = findCol(H, ["closing", "close stock", "stock", "quantity", "qty", "balance", "on hand"]);
+  if (cCode < 0) cCode = findCol(H, CODE_NAMES);
+  if (cCode === cArt) cCode = -1;
+  const cUom = findCol(H, UOM_NAMES);
+  const cOpen = findCol(H, OPEN_NAMES);
+  const cRec = findCol(H, REC_NAMES);
+  const cCons = findCol(H, CONS_NAMES);
+  let cClose = findCol(H, CLOSE_NAMES);
 
-  if (cArt < 0) return { error: "Could not find Article/Item column. Need: Date | Plant | Article | Closing." };
-  if (cDate < 0 && cClose < 0) return { error: "Need at least Date and Stock columns." };
+  if (cArt < 0) {
+    const guess = guessTextColumn(grid, hi);
+    if (guess >= 0) cArt = guess;
+    else return { error: `Could not find Article/Item column (row ${hi + 1}: ${headerLabel(grid, hi)}). Need: Date | Plant | Article | Closing.` };
+  }
+  if (cClose < 0) {
+    const skip = new Set([cArt, cDate, cPlant, cCode, cUom, cOpen, cRec, cCons].filter((v) => v >= 0));
+    const guess = guessNumericColumn(grid, hi, skip);
+    if (guess >= 0) cClose = guess;
+  }
+  if (cDate < 0 && cClose < 0) return { error: `Need at least Date and Stock columns (row ${hi + 1}: ${headerLabel(grid, hi)}).` };
 
+  const fallbackDate = todayStr();
   const out = [];
   for (let r = hi + 1; r < grid.length; r++) {
     const row = grid[r];
-    const art = (row[cArt] || "").trim();
-    if (!art) continue;
-    const ds = cDate >= 0 ? parseDate(row[cDate]) : "";
+    if (!row || row.every((c) => String(c ?? "").trim() === "")) continue;
+    const artRaw = String(row[cArt] ?? "").trim();
+    if (!artRaw) continue;
+    // Skip repeated header rows / total rows that sneak into the body
+    const artN = norm(artRaw);
+    if (ARTICLE_NAMES.includes(artN) || artN === "short text" || artN === "total" || artN === "grand total") continue;
+    let ds = cDate >= 0 ? parseDate(row[cDate]) : "";
     if (cDate >= 0 && !ds) continue;
+    if (!ds) ds = fallbackDate; // Plant|Article|Closing snapshot without a Date column
     const plant = cPlant >= 0 ? ((row[cPlant] || "").trim() || "Main") : "Main";
     out.push({
-      date: ds || "9999-12-31", plant, article: art,
+      date: ds, plant, article: artRaw,
       code: cCode >= 0 ? (row[cCode] || "").trim() : "",
       uom: cUom >= 0 ? (row[cUom] || "").trim() : "",
       opening: cOpen >= 0 ? parseNum(row[cOpen]) : 0,
@@ -205,8 +333,8 @@ export function gridToRecords(grid) {
       hasCons: cCons >= 0 && String(row[cCons] ?? "").trim() !== "",
     });
   }
-  if (!out.length) return { error: "No data rows found. Check the Excel Help tab." };
-  return { records: finalizeDerived(out.filter((r) => r.date !== "9999-12-31")) };
+  if (!out.length) return { error: `No data rows found below row ${hi + 1}. Check the Excel Help tab — need Date | Plant | Article | Closing.` };
+  return { records: finalizeDerived(out) };
 }
 
 function finalizeDerived(recs) {
