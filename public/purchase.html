@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Dashboard - Malpani Tea Corporation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100%}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#F7F8F7;color:#1c2420}
+.app{display:flex;min-height:100vh;max-width:100vw;overflow-x:clip}
+.side{width:228px;background:#fff;position:fixed;top:0;bottom:0;left:0;border-right:1px solid #e9ece9;padding:20px 14px;display:flex;flex-direction:column;gap:18px;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px}
+.brand .mark{background:none;border:0;border-radius:0;overflow:visible;position:relative;flex:none;display:flex;align-items:center;justify-content:center;min-width:40px;min-height:40px}
+.brand .mark .fallback{width:38px;height:38px;border-radius:12px;background:#1E6F3C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.brand .mark img{position:static;width:40px;height:auto;display:block}
+.brand b{font-size:14px;display:block;line-height:1.15}
+.brand small{color:#6B7280;font-size:11px}
+.grouplabel{font-size:11px;letter-spacing:.08em;color:#9aa3a0;padding:0 10px;margin-top:4px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:#3c4642;text-decoration:none;font-size:13.5px;font-weight:500}
+.nav a svg{width:18px;height:18px;flex:none}
+.nav a.active{background:#1E6F3C;color:#fff}
+.nav a:not(.active):hover{background:#D9F0E1}
+.side .foot{margin-top:auto;color:#9aa3a0;font-size:11px;padding:0 10px}
+.main{margin-left:228px;flex:1;min-width:0;width:calc(100% - 228px);padding:18px 26px 40px;max-width:1320px}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.search{flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #e6eae6;border-radius:14px;padding:10px 14px;min-width:200px;max-width:100%}
+.search input{border:0;outline:0;flex:1;min-width:0;font-size:13.5px;background:transparent}
+.iconbtn{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid #e6eae6;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+.iconbtn svg{width:19px;height:19px}
+.dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#D64545;border:2px solid #fff}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#1E6F3C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.user b{font-size:13.5px;display:block;line-height:1.2}
+.user small{color:#6B7280;font-size:11.5px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;margin:20px 2px 12px;gap:12px;flex-wrap:wrap}
+.pagehead h1{font-size:clamp(20px,2.5vw,24px);font-weight:800}
+.pagehead p{color:#6B7280;font-size:13px;margin-top:4px;max-width:100%}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border-radius:12px;padding:11px 18px;font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid #1E6F3C;white-space:nowrap;max-width:100%}
+.btn.solid{background:#1E6F3C;color:#fff}
+.btn.ghost{background:#fff;color:#1E6F3C}
+.chips{display:flex;gap:8px;margin:4px 2px 14px;flex-wrap:wrap}
+.chip{border:1px solid #dfe5df;background:#fff;border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:600;color:#4b5551;cursor:pointer;white-space:nowrap}
+.chip.active{background:#1E6F3C;border-color:#1E6F3C;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.stat{background:#fff;border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(30,60,40,.08);min-width:0;overflow:hidden}
+.stat.green{background:#1E6F3C;color:#fff}
+.stat .lbl{font-size:11.5px;color:#8a938f;font-weight:600;letter-spacing:.02em}
+.stat.green .lbl{color:#cde8d6}
+.stat .big{font-size:clamp(22px,2.6vw,32px);font-weight:800;margin:6px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .val{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.stat.green .val{color:#eaf7ee}
+.stat .val{color:#1E6F3C}
+.stat .delta{font-size:11.5px;color:#6B7280;margin-top:6px}
+.stat.green .delta{color:#d7ecdd}
+.up{color:#1E6F3C;font-weight:700}
+.stat.green .up{color:#fff}
+.down{color:#D64545;font-weight:700}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;margin-top:14px;align-items:start}
+.grid>.left,.grid>.right{display:flex;flex-direction:column;gap:14px;min-width:0;max-width:100%}
+.grid>.card{grid-column:1/-1;min-width:0;max-width:100%;margin-bottom:0}
+.card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(30,60,40,.08);margin-bottom:14px;min-width:0;max-width:100%;overflow:hidden}
+.grid .card{margin-bottom:0}
+.card h3{font-size:15.5px;font-weight:800}
+.card .sub{font-size:12px;color:#8a938f;margin:3px 0 14px;overflow-wrap:anywhere}
+.vrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #f0f2f0;max-width:100%}
+.vlogo{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+.vrow b{font-size:13.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vrow small{color:#8a938f;font-size:11.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vrow .grow{flex:1;min-width:0}
+.pill{font-size:11px;font-weight:700;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.pill.ok{background:#D9F0E1;color:#1E6F3C}
+.pill.warn{background:#fdf0d3;color:#9a6b00}
+.pill.bad{background:#fbe0e0;color:#b03232}
+.approw{border:1px solid #eef1ee;border-radius:14px;padding:11px 12px;margin-bottom:9px;max-width:100%;overflow:hidden}
+.approw .l1{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:800}
+.approw .l1 .amt{color:#1E6F3C;white-space:nowrap}
+.approw .l2{font-size:11.5px;color:#8a938f;margin:3px 0 8px;overflow-wrap:anywhere}
+.approw .l3{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.mini{border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #1E6F3C}
+.mini.a{background:#1E6F3C;color:#fff}
+.mini.h{background:#fff;color:#1E6F3C}
+.mini:disabled{opacity:.45;cursor:default}
+.routed{font-size:11px;color:#6B7280;background:#F7F8F7;border-radius:999px;padding:6px 10px;font-weight:600}
+.frow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f0f2f0;max-width:100%}
+.fdot{width:9px;height:9px;border-radius:50%;flex:none}
+.frow b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frow small{color:#8a938f;font-size:11.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frow .grow{flex:1;min-width:0}
+.rmrow{border-top:1px solid #f0f2f0;padding:9px 0;font-size:12.5px}
+.rmrow small{color:#6B7280}
+.dtable{width:100%;max-width:100%;border-collapse:collapse;font-size:12.5px;min-width:0;table-layout:auto}
+.dtable th{position:sticky;top:0;background:#eef4ef;color:#3c4642;text-align:left;padding:10px 10px;font-size:11.5px;white-space:nowrap;cursor:pointer;user-select:none;z-index:1;vertical-align:bottom}
+.dtable th.num,.dtable td.num{text-align:right}
+.dtable td{border-top:1px solid #f0f2f0;padding:10px;vertical-align:top;font-size:12.5px;line-height:1.45}
+.dtable tr.man td{background:#f4faf5}
+.dtable th:nth-child(1),.dtable td:nth-child(1){white-space:nowrap}
+.dtable th:nth-child(3),.dtable td:nth-child(3),.dtable th:nth-child(4),.dtable td:nth-child(4),.dtable th:nth-child(5),.dtable td:nth-child(5){white-space:nowrap}
+.dtable td:nth-child(2){min-width:0}
+.dtable .mut{color:#8a938f;font-size:11.5px;font-weight:400;line-height:1.45;overflow-wrap:anywhere}
+.dtable td b{font-size:12.5px;line-height:1.35}
+.dtable .pill{font-size:11px;padding:5px 11px;white-space:nowrap;display:inline-block}
+.dtable .stsel{width:100%;max-width:135px;font-size:12px;padding:7px 8px;border:1px solid #e0e6e0;border-radius:9px;background:#fff}
+.dtable select{max-width:100%}
+#view-status .card>div[style*="overflow"]{max-width:100%;width:100%;border:1px solid #eef1ee;border-radius:12px;overflow-x:hidden !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch}
+#view-status .card{padding:16px}
+#spend{width:100%;max-width:100%;overflow:hidden}
+#spend svg{display:block;max-width:100%}
+#gauge{max-width:100%;overflow:hidden}
+.fsel{border:1px solid #e0e6e0;border-radius:10px;padding:9px;font:inherit;font-size:12.5px;background:#fff;max-width:100%}
+.remind{border:1px solid #e0e6e0;background:#fff;border-radius:10px;width:32px;height:32px;cursor:pointer;font-size:14px;flex:none}
+.scroll{max-height:380px;overflow:auto;padding-right:4px;max-width:100%}
+.wingrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(290px,100%),1fr));gap:12px}
+.win{border:1px solid #eef1ee;border-radius:14px;padding:12px;min-width:0;max-width:100%;overflow:hidden}
+.dark{background:#232a26;color:#eef3ef}
+.dark .sub{color:#9fb0a6}
+.dark .exp{display:flex;gap:12px;margin:12px 0}
+.dark .exp div{flex:1;background:#2e3631;border-radius:14px;padding:14px;text-align:center}
+.dark .exp b{font-size:26px;display:block}
+.dark .exp span{font-size:11.5px;color:#9fb0a6}
+.dark .inrow{border-top:1px solid #39423c;padding:9px 0;font-size:12.5px}
+.dark .inrow small{color:#9fb0a6}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c2420;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:50;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sync{font-size:11px;font-weight:700;border-radius:999px;padding:6px 12px;white-space:nowrap;background:#eef1ee;color:#8a938f}
+.sync.ok{background:#D9F0E1;color:#1E6F3C}
+.sync.busy{background:#fdf0d3;color:#9a6b00}
+.sync.err{background:#eef1ee;color:#8a938f}
+.gaugeWrap{display:flex;flex-direction:column;align-items:center;max-width:100%;overflow:hidden}
+.legend{display:flex;gap:16px;font-size:12px;color:#6B7280;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+#view-dash,#view-status{min-width:0;max-width:100%}
+img,svg,table{max-width:100%}
+@media(max-width:1100px){.side{width:70px}.side .brand b,.side .brand small,.grouplabel,.nav a span,.side .foot{display:none}.nav a{justify-content:center}.main{margin-left:70px;width:calc(100% - 70px)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:1fr 1fr}.main{padding:14px}.card{padding:16px}.top{gap:10px}#view-status .card{padding:12px}.dtable th,.dtable td{padding:8px}.dtable .stsel{max-width:115px}}
+@media(max-width:560px){.stats{grid-template-columns:minmax(0,1fr)}.user div{display:none}.main{padding:12px}.btn{padding:10px 14px;font-size:12.5px}.scroll{max-height:300px}#view-status .card{padding:10px}.dtable{font-size:12px}.dtable th,.dtable td{padding:8px 6px}}
+@media(max-width:760px){
+#view-status .card{padding:12px}
+#sttable thead{display:none}
+#sttable,#sttable tbody,#sttable tr,#sttable td{display:block;width:100% !important;max-width:100% !important}
+#sttable{border-collapse:separate;border-spacing:0}
+#sttable tr{border:1px solid #eef1ee;border-radius:14px;margin-bottom:10px;padding:4px 12px;background:#fff}
+#sttable tr.man{border-color:#1E6F3C;background:#f4faf5}
+#sttable tr.man td{background:transparent}
+#sttable td{border:0;border-top:1px dashed #eef1ee;padding:9px 0;text-align:left !important;white-space:normal !important;overflow-wrap:anywhere}
+#sttable td:first-child{border-top:0}
+#sttable td::before{display:block;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#8a938f;margin-bottom:3px}
+#sttable td:nth-child(1)::before{content:'PO / PRS'}
+#sttable td:nth-child(2)::before{content:'Item / Vendor'}
+#sttable td:nth-child(3)::before{content:'Due date'}
+#sttable td:nth-child(4)::before{content:'Quantity'}
+#sttable td:nth-child(5)::before{content:'Value'}
+#sttable td:nth-child(6)::before{content:'Status'}
+#sttable td:nth-child(7)::before{content:'Set status'}
+#sttable td[colspan]{text-align:center !important}
+#sttable td[colspan]::before{display:none}
+#sttable .stsel{max-width:100%;font-size:13px;padding:10px}
+#sttable .pill{font-size:11.5px}
+#view-status .fsel{flex:1 1 130px;min-width:0;padding:10px}
+#mSort{display:block}
+#newSt{flex:1 1 100% !important;min-width:0 !important}
+#view-status .card>div[style*="overflow"]{border:0;max-height:420px}
+.mini{padding:9px 14px}
+.btnrow .btn{flex:1;text-align:center}
+}
+/* ===== PRO POLISH: motion + depth (visual only) ===== */
+:root{--brand:#1E6F3C;--brand-2:#249252;--ring:0 0 0 3px rgba(30,111,60,.16);--sh-sm:0 2px 8px rgba(30,60,40,.08);--sh-md:0 10px 30px rgba(30,60,40,.10);--sh-lg:0 18px 44px rgba(30,60,40,.14);--ease:cubic-bezier(.22,.9,.28,1)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1200px 500px at 85% -10%,#e9f4ec 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#eef6f0 0%,transparent 55%),#F7F8F7}
+::selection{background:#1E6F3C;color:#fff}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(214,69,69,.45)}50%{box-shadow:0 0 0 5px rgba(214,69,69,0)}}
+.pagehead{animation:riseIn .5s var(--ease) both}
+.top{animation:riseIn .45s var(--ease) both}
+.stats .stat{animation:riseIn .5s var(--ease) both}
+.stats .stat:nth-child(2){animation-delay:.06s}
+.stats .stat:nth-child(3){animation-delay:.12s}
+.stats .stat:nth-child(4){animation-delay:.18s}
+#view-dash .grid>*{animation:riseIn .55s var(--ease) both}
+#view-dash .grid>*:nth-child(2){animation-delay:.08s}
+#view-dash .grid>*:nth-child(3){animation-delay:.16s}
+#view-status .card{animation:popIn .35s var(--ease) both}
+.card{transition:transform .25s var(--ease),box-shadow .25s var(--ease);border:1px solid rgba(30,111,60,.07)}
+.card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+.card h3{display:flex;align-items:center;gap:8px}
+.card h3::before{content:'';width:4px;height:16px;border-radius:99px;background:linear-gradient(180deg,var(--brand-2),var(--brand));flex:none}
+.stat{transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.stat:hover{transform:translateY(-3px);box-shadow:var(--sh-lg)}
+.stat.green{background:linear-gradient(135deg,#249252 0%,#1E6F3C 55%,#155c31 100%);position:relative}
+.stat.green::after{content:'';position:absolute;top:-40%;right:-25%;width:70%;height:180%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.14) 50%,transparent 60%);transform:rotate(8deg);pointer-events:none}
+.btn{transition:transform .15s var(--ease),box-shadow .2s var(--ease),background .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh-md)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.solid{background:linear-gradient(180deg,#249252,#1E6F3C);box-shadow:0 6px 16px rgba(30,111,60,.28)}
+.btn:focus-visible,.chip:focus-visible,.mini:focus-visible,.fsel:focus-visible,.iconbtn:focus-visible,.nav a:focus-visible{outline:none;box-shadow:var(--ring)}
+.chip{transition:all .2s var(--ease)}
+.chip:hover{transform:translateY(-1px);box-shadow:var(--sh-sm)}
+.chip.active{box-shadow:0 6px 14px rgba(30,111,60,.3)}
+.mini{transition:transform .15s var(--ease),box-shadow .2s,background .2s}
+.mini:hover{transform:translateY(-1px);box-shadow:var(--sh-sm)}
+.mini:active{transform:scale(.96)}
+.nav a{transition:background .2s,color .2s,transform .2s var(--ease)}
+.nav a:hover{transform:translateX(2px)}
+.nav a.active{box-shadow:0 8px 18px rgba(30,111,60,.3)}
+.iconbtn{transition:transform .2s var(--ease),box-shadow .2s}
+.iconbtn:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+.iconbtn:active{transform:scale(.94)}
+.search{transition:box-shadow .2s,border-color .2s}
+.search:focus-within{border-color:var(--brand);box-shadow:var(--ring)}
+.fsel{transition:box-shadow .2s,border-color .2s}
+.fsel:focus{border-color:var(--brand);box-shadow:var(--ring);outline:none}
+.vrow,.frow,.approw,.rmrow,.win{transition:background .2s,transform .2s var(--ease)}
+.vrow:hover,.frow:hover{background:#f4faf5;border-radius:12px}
+.approw:hover{border-color:#cfe6d6;box-shadow:var(--sh-sm)}
+.win:hover{border-color:#cfe6d6;box-shadow:var(--sh-sm);transform:translateY(-2px)}
+.dtable tbody tr{transition:background .15s}
+.dtable tbody tr:hover td{background:#f2f9f3}
+.dtable tbody tr.man:hover td{background:#e6f3e9}
+.pill.bad{animation:dotPulse 2s infinite}
+.dot{animation:dotPulse 2s infinite}
+.toast{transition:opacity .3s var(--ease),transform .3s var(--ease);box-shadow:0 14px 40px rgba(0,0,0,.28)}
+.scroll::-webkit-scrollbar,#view-status .card>div[style*="overflow"]::-webkit-scrollbar{width:8px;height:8px}
+.scroll::-webkit-scrollbar-thumb,#view-status .card>div[style*="overflow"]::-webkit-scrollbar-thumb{background:#c4d6c8;border-radius:99px}
+.scroll::-webkit-scrollbar-track,#view-status .card>div[style*="overflow"]::-webkit-scrollbar-track{background:transparent}
+.scroll{scrollbar-width:thin;scrollbar-color:#c4d6c8 transparent}
+.brand .mark{box-shadow:0 6px 14px rgba(30,60,40,.18)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}html{scroll-behavior:auto}}
+/* ===== PRO POLISH 2: bold premium theme ===== */
+@keyframes sheenDrift{0%{transform:translateX(-35%) rotate(8deg)}50%{transform:translateX(35%) rotate(8deg)}100%{transform:translateX(-35%) rotate(8deg)}}
+body{background:radial-gradient(1100px 480px at 90% -10%,#dff0e3 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#e7f3ea 0%,transparent 55%),radial-gradient(rgba(30,111,60,.06) 1px,transparent 1.6px),#F5F7F5;background-size:auto,auto,22px 22px,auto}
+.side{background:linear-gradient(180deg,#0b3120 0%,#104a2c 55%,#166534 100%);border-right:0;color:#e9f4ed;box-shadow:8px 0 28px rgba(12,53,32,.25)}
+.brand b{color:#fff}
+.brand small{color:#a9cbb3}
+.grouplabel{color:#8fb89b}
+.nav a{color:#cfe6d5}
+.nav a svg{opacity:.9}
+.nav a:not(.active):hover{background:rgba(255,255,255,.12);color:#fff;transform:translateX(2px)}
+.nav a.active{background:#fff;color:#14532d;box-shadow:0 10px 22px rgba(0,0,0,.3)}
+.side .foot{color:#8fb89b}
+.top .search,.top .iconbtn{background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.pagehead h1{letter-spacing:-.02em}
+.stat .big{letter-spacing:-.02em}
+.stat{position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--brand-2),var(--brand))}
+.stat.green::before{display:none}
+.stat.green::after{animation:sheenDrift 7s ease-in-out infinite}
+.dtable th{background:linear-gradient(180deg,#1c8344,#145c30);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.dtable th:hover{background:linear-gradient(180deg,#22a04e,#17703a)}
+.dtable{border-radius:12px;overflow:hidden}
+.btn.solid{background:linear-gradient(180deg,#28a657,#157a37);box-shadow:0 8px 20px rgba(21,122,55,.35)}
+.chip.active{background:linear-gradient(180deg,#249252,#1a6b38);box-shadow:0 6px 16px rgba(21,122,55,.4)}
+.pill{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 6px rgba(30,60,40,.12)}
+.toast{border-top:3px solid var(--brand-2)}
+#view-status .card>div[style*="overflow"]{border:1px solid rgba(30,111,60,.14);box-shadow:inset 0 2px 10px rgba(30,60,40,.06)}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<div class="brand"><div class="mark"><span class="fallback">M</span><img src="malpani-logo.png" alt="Malpani logo" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'"></div><div><b>Malpani Tea</b><small>Corporation</small></div></div>
+<div class="grouplabel">MENU</div>
+<nav class="nav">
+<a href="#" id="navDash" class="active" onclick="showView('dash');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Dashboard</span></a>
+<a href="#" id="navStatus" onclick="showView('status');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Update Status</span></a>
+</nav>
+<div class="grouplabel">APPS</div>
+<nav class="nav">
+<a href="./index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v11a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 20V12h6v8"/></svg><span>Warehouse</span></a>
+<a href="./purchase.html" style="background:rgba(255,255,255,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg><span>Purchase ★ you are here</span></a>
+</nav>
+<div class="foot" id="srcfoot">SAP ME2N export</div>
+</aside>
+<div class="main">
+<header class="top">
+<div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a938f" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Search follow-ups by PO No / vendor name"></div>
+<div class="iconbtn" onclick="toast('Mailbox is not part of this static export')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+<div class="iconbtn" onclick="toast(document.querySelectorAll('#followups .frow').length+' overdue lines need attention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8M10 21a2 2 0 004 0"/></svg><span class="dot"></span></div>
+<span id="syncBadge" class="sync" title="Shared-data sync: Synced = this device matches the cloud copy">Local</span><div class="user"><div class="avatar">SS</div><div><b>Sahil Sapate</b><small>Malpani Tea Corporation</small></div></div>
+</header>
+<div id="view-dash">
+<div class="pagehead">
+<div><h1>Purchase Dashboard</h1><p id="subtitle"></p></div>
+<div class="btnrow"><a class="btn ghost" href="./index.html" style="text-decoration:none;display:inline-block">🏭 Warehouse</a><button class="btn ghost" onclick="document.getElementById('filepick').click()">&#8681; Import from ERP</button><button class="btn solid" onclick="toast('New PO is created in SAP ME2N - this board is read-only')">+ New PO</button></div>
+</div>
+<input type="file" id="filepick" accept=".csv,.txt,.tsv,.xlsx,.xls" style="display:none">
+<div class="chips">
+<button class="chip" data-r="week">This Week</button>
+<button class="chip active" data-r="month">This Month</button>
+<button class="chip" data-r="quarter">This Quarter</button>
+</div>
+<section class="stats">
+<div class="stat green"><div class="lbl">TOTAL POs THIS MONTH</div><div class="big" id="s1n"></div><div class="val" id="s1v"></div><div class="delta" id="s1d"></div></div>
+<div class="stat"><div class="lbl">DELIVERED (PARTIAL RECEIPTS)</div><div class="big" id="s2n"></div><div class="val" id="s2v"></div><div class="delta" id="s2d"></div></div>
+<div class="stat"><div class="lbl">OPEN / IN TRANSIT</div><div class="big" id="s3n"></div><div class="val" id="s3v"></div><div class="delta" id="s3d"></div></div>
+<span id="dynStats" style="display:contents"></span>
+</section>
+<div class="grid">
+<div class="left">
+<div class="card"><h3>Monthly Spend</h3><div class="sub">PO value by PO date, last 8 months (refreshes with imported file)</div><div id="spend"></div></div>
+<div class="card"><h3>Vendor Performance</h3><div class="sub">Top 6 vendors by PO value - on-time = lines not overdue</div><div id="vendors"></div></div>
+<div class="card"><h3>Order Fulfilment</h3><div class="sub">Lines due this month: not overdue (on track) vs overdue</div><div class="gaugeWrap"><div id="gauge"></div><div class="legend"><span><i style="background:#1E6F3C"></i>On track</span><span><i style="background:#D64545"></i>Overdue</span><span><i style="background:#F0A500"></i><span id="legRecv"></span></span></div></div></div>
+</div>
+<div class="right">
+<div class="card"><h3>Follow-ups Due</h3><div class="sub" id="folsub"></div><div class="scroll" id="followups"></div></div>
+</div>
+<div class="card"><h3>Status Windows</h3><div class="sub" id="winsub"></div><div class="wingrid" id="statusWindows"></div></div>
+</div>
+</div>
+<div id="view-status" style="display:none">
+<div class="pagehead"><div><h1>Update Order Status</h1><p id="stsub"></p></div><div class="btnrow"><button class="btn ghost" onclick="resetOverrides()">Reset all to auto</button></div></div>
+<div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input type="hidden" id="sq" value=""><select id="fqPlant" class="fsel" onchange="setPlant(this.value)" title="Plant filter"><option value="">No plant data</option></select><select id="fqStatus" class="fsel" onchange="setStF('st',this.value)" style="display:none"><option value="">All statuses</option><option value="MANUAL">Manually set</option><option value="Open">Open</option><option value="Late">Late</option><option value="Received">Received</option></select><select id="fqVendor" class="fsel" onchange="setStF('fv',this.value)"><option value="">All vendors</option></select><select id="mSort" class="fsel" onchange="stSort(this.value)" title="Sort rows"><option value="po">Sort: PO</option><option value="item">Sort: Item</option><option value="due" selected>Sort: Due date</option><option value="qty">Sort: Qty</option><option value="val">Sort: Value</option><option value="est">Sort: Status</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center"><input id="newSt" placeholder="New custom status, e.g. Partially Received" maxlength="24" style="border:1px solid #e0e6e0;border-radius:10px;padding:9px;font:inherit;font-size:12.5px;flex:1;min-width:180px"><button class="mini a" onclick="addCustom()">Add status</button><span id="customChips" style="display:flex;gap:6px;flex-wrap:wrap"></span></div><div style="overflow-x:hidden;overflow-y:auto;max-height:560px;max-width:100%"><table class="dtable" id="sttable"><thead><tr><th data-k="po" onclick="stSort('po')">PO / PRS</th><th data-k="item" onclick="stSort('item')">Item / Vendor</th><th data-k="due" onclick="stSort('due')">Due / PO date</th><th data-k="qty" class="num" onclick="stSort('qty')">Qty Ord / Recv-Bal</th><th data-k="val" class="num" onclick="stSort('val')">Value</th><th data-k="est" onclick="stSort('est')">Auto / Status</th><th>Set</th></tr></thead><tbody id="stlist"></tbody></table></div></div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const TODAY=new Date().toISOString().slice(0,10);
+let IMPORT_D='built-in file of 17 Sep 2026';
+const BUILD='2026-09-17 18:16';
+let DATA=[{"po": "40007416", "prs": "40004084 / 90", "vendor": "M K Steel India - Mumbai", "item": "MS Bright Round Bar - 25mm [71020747]", "qty": "20", "val": "1480.00", "date": "2026-04-14", "due": "2026-04-19", "recv": 19.0, "todel": 1.0, "st": "Late", "days": 151}, {"po": "40007467", "prs": "40004112 / 20", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Family Elaichi Tea [44000019]", "qty": "500", "val": "7450.00", "date": "2026-04-29", "due": "2026-05-14", "recv": 450.0, "todel": 50.0, "st": "Late", "days": 126}, {"po": "40007595", "prs": "40004164 / 80", "vendor": "Abhinav Enterprises - Mu", "item": "Polyster  Film Family Elaichi Tea 5 Rs. [44000180]", "qty": "500", "val": "126000.00", "date": "2026-05-25", "due": "2026-06-15", "recv": 462.24, "todel": 37.76, "st": "Late", "days": 94}, {"po": "40007622", "prs": "40004166 / 20", "vendor": "Vardhaman Packaging Indu", "item": "Carton Family Elaichi 250 gm Box  M [44000252]", "qty": "600", "val": "25638.00", "date": "2026-05-28", "due": "2026-06-12", "recv": 567.0, "todel": 33.0, "st": "Late", "days": 97}, {"po": "40007675", "prs": "40004182 / 10", "vendor": "Yuva Polyprint & Packagi", "item": "Poly Film Family Elaichi Tea 250 G K.A. [44000260]", "qty": "500", "val": "126000.00", "date": "2026-06-04", "due": "2026-07-03", "recv": 400.17, "todel": 99.83, "st": "Late", "days": 76}, {"po": "40007709", "prs": "40004190 / 20", "vendor": "Laxmi Steel - Sangamner", "item": "MS Square Pipe [71002033]", "qty": "140", "val": "9660.00", "date": "2026-06-09", "due": "2026-06-12", "recv": 41.8, "todel": 98.2, "st": "Late", "days": 97}, {"po": "40007739", "prs": "40004194 / 80", "vendor": "Abhinav Enterprises - Mu", "item": "Polyester Film Family Elaichi Tea 10 Rs [44000234]", "qty": "1000", "val": "252000.00", "date": "2026-06-10", "due": "2026-07-01", "recv": 894.76, "todel": 105.24, "st": "Late", "days": 78}, {"po": "40007785", "prs": "40004197 / 10", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Family Elaichi Tea 10 Rs. [44000020]", "qty": "2000", "val": "31380.00", "date": "2026-06-16", "due": "2026-07-01", "recv": 1870.0, "todel": 130.0, "st": "Late", "days": 78}, {"po": "40007786", "prs": "40004197 / 20", "vendor": "Pradeep Polyflex Pvt Ltd", "item": "Poly Film Amruta Royal Blend�MRP 10 Rs [44000283]", "qty": "300", "val": "81600.00", "date": "2026-06-16", "due": "2026-07-07", "recv": 227.54, "todel": 72.46, "st": "Late", "days": 72}, {"po": "40007787", "prs": "40004197 / 30", "vendor": "Vardhaman Packaging Indu", "item": "CROSS PLATE 500 GM [44000375]", "qty": "1000", "val": "13760.00", "date": "2026-06-16", "due": "2026-07-01", "recv": 780.0, "todel": 220.0, "st": "Late", "days": 78}, {"po": "40007915", "prs": "40004217 / 20", "vendor": "I Y Hokabaj - Ahmedabad", "item": "Cotton (Canvas) Thaili [69000753]", "qty": "50000", "val": "1245000.00", "date": "2026-07-03", "due": "2026-08-15", "recv": 35400.0, "todel": 14600.0, "st": "Late", "days": 33}, {"po": "40007916", "prs": "40004217 / 30", "vendor": "I Y Hokabaj - Ahmedabad", "item": "Non Woven Bag small [69000754]", "qty": "650000", "val": "8287500.00", "date": "2026-07-03", "due": "2026-10-07", "recv": 266880.0, "todel": 383120.0, "st": "Open", "days": -20}, {"po": "40007919", "prs": "40004217 / 30", "vendor": "Selmore Advertisers Pvt", "item": "Non Woven Bag Small [69000754]", "qty": "650000", "val": "8287500.00", "date": "2026-07-03", "due": "2026-10-04", "recv": 181952.0, "todel": 468048.0, "st": "Open", "days": -17}, {"po": "40007940", "prs": "40004293 / 30", "vendor": "Yuva Polyprint & Packagi", "item": "Poly Film Family Elaichi 250g Scheme [44000110]", "qty": "6510", "val": "1607970.00", "date": "2026-08-25", "due": "2026-08-13", "recv": 2067.56, "todel": 4442.44, "st": "Late", "days": 35}, {"po": "40007940", "prs": "40004293 / 40", "vendor": "Yuva Polyprint & Packagi", "item": "Standi Pouch Family Elaichi 500 gm Schem [44000391]", "qty": "145000", "val": "542300.00", "date": "2026-08-25", "due": "2026-08-13", "recv": 132370.0, "todel": 12630.0, "st": "Late", "days": 35}, {"po": "40007941", "prs": "40004315 / 20", "vendor": "Pradeep Polyflex Pvt Ltd", "item": "Standi Pouch Josh 500 gm Scheme [44000394]", "qty": "88000", "val": "357280.00", "date": "2026-08-31", "due": "2026-08-13", "recv": 82400.0, "todel": 5600.0, "st": "Late", "days": 35}, {"po": "40007966", "prs": "40004235 / 20", "vendor": "Pradeep Polyflex Pvt Ltd", "item": "Poly Film First Class Chai Rs 20 [44000208]", "qty": "300", "val": "72600.00", "date": "2026-07-10", "due": "2026-08-13", "recv": 246.88, "todel": 53.12, "st": "Late", "days": 35}, {"po": "40008013", "prs": "40004245 / 10", "vendor": "Yuva Polyprint & Packagi", "item": "Poly Film Family Elaichi  Tea 250 gm [44000109]", "qty": "2000", "val": "494000.00", "date": "2026-07-18", "due": "2026-08-08", "recv": 344.11, "todel": 1655.89, "st": "Late", "days": 40}, {"po": "40008048", "prs": "40004247 / 10", "vendor": "Rajendra Cloth Stores -", "item": "Sari 6 Wari [72020077]", "qty": "10", "val": "4000.08", "date": "2026-07-23", "due": "2026-07-31", "recv": 0.0, "todel": 10.0, "st": "Late", "days": 48}, {"po": "40008130", "prs": "40004264 / 30", "vendor": "Shubham Packaging Indust", "item": "HDPE BAG HOTEL DUST  1 Kg [44000157]", "qty": "1000", "val": "15240.00", "date": "2026-08-03", "due": "2026-08-18", "recv": 900.0, "todel": 100.0, "st": "Late", "days": 30}, {"po": "40008135", "prs": "40004251 / 10", "vendor": "Akar Shrink Packs- Sinna", "item": "Shrink Sleeve Prem Elaichi 250 gm SQ Jar [44000403]", "qty": "30000", "val": "44400.00", "date": "2026-08-04", "due": "2026-08-29", "recv": 5500.0, "todel": 24500.0, "st": "Late", "days": 19}, {"po": "40008146", "prs": "40004260 / 10", "vendor": "Saidarshan Airplast Indu", "item": "Pet Jar Elaichi Chai 250 gm [44000262]", "qty": "10000", "val": "115000.00", "date": "2026-08-06", "due": "2026-08-30", "recv": 9040.0, "todel": 960.0, "st": "Late", "days": 18}, {"po": "40008204", "prs": "40004281 / 40", "vendor": "Yuva Polyprint & Packagi", "item": "Polyster  Film Family Elaichi Tea 5 Rs. [44000180]", "qty": "500", "val": "123500.00", "date": "2026-08-12", "due": "2026-09-03", "recv": 159.0, "todel": 341.0, "st": "Late", "days": 14}, {"po": "40008204", "prs": "40004281 / 60", "vendor": "Yuva Polyprint & Packagi", "item": "Polyester Film Family Elaichi Tea 10 Rs [44000234]", "qty": "2000", "val": "494000.00", "date": "2026-08-12", "due": "2026-09-03", "recv": 456.74, "todel": 1543.26, "st": "Late", "days": 14}, {"po": "40008229", "prs": "40004284 / 10", "vendor": "Vardhaman Packaging Indu", "item": "Carton Family Elaichi Standi Pouch 1KG [44000134]", "qty": "1000", "val": "79440.00", "date": "2026-08-14", "due": "2026-08-29", "recv": 875.0, "todel": 125.0, "st": "Late", "days": 19}, {"po": "40008283", "prs": "40004288 / 20", "vendor": "R B Desai & Company - Ah", "item": "Non Woven Fabric Bag Kadak Chai 1 kg [44000044]", "qty": "5000", "val": "45000.00", "date": "2026-08-20", "due": "2026-09-10", "recv": 0.0, "todel": 5000.0, "st": "Late", "days": 7}, {"po": "40008283", "prs": "40004288 / 30", "vendor": "R B Desai & Company - Ah", "item": "Non Woven Fabric Bag Loose Kasti Mix 1kg [44000046]", "qty": "5000", "val": "45000.00", "date": "2026-08-20", "due": "2026-09-10", "recv": 0.0, "todel": 5000.0, "st": "Late", "days": 7}, {"po": "40008336", "prs": "40004307 / 10", "vendor": "Noble Printing Press Pvt", "item": "Duplex Box First Class Chai 250 Gm [44000210]", "qty": "40000", "val": "180000.00", "date": "2026-08-26", "due": "2026-09-16", "recv": 0.0, "todel": 40000.0, "st": "Late", "days": 1}, {"po": "40008348", "prs": "40004312 / 20", "vendor": "Venkatesh Agencies - San", "item": "Pended Holder [71000178]", "qty": "6", "val": "212.40", "date": "2026-08-28", "due": "2026-08-29", "recv": 5.0, "todel": 1.0, "st": "Late", "days": 19}, {"po": "40008348", "prs": "40004312 / 70", "vendor": "Venkatesh Agencies - San", "item": "MCB Box: 4Pole Dubble doors [71000509]", "qty": "3", "val": "5310.00", "date": "2026-08-28", "due": "2026-08-29", "recv": 2.0, "todel": 1.0, "st": "Late", "days": 19}, {"po": "40008362", "prs": "40004314 / 40", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Family Elaichi Tea 250 gm [44000140]", "qty": "5000", "val": "79850.00", "date": "2026-09-01", "due": "2026-09-16", "recv": 0.0, "todel": 5000.0, "st": "Late", "days": 1}, {"po": "40008363", "prs": "40004314 / 20", "vendor": "Suyash Plastic Industrie", "item": "H.M.HDPE Bag 6.5\"x1.5\"x1.5\"x12\" [44000015]", "qty": "300", "val": "50790.00", "date": "2026-09-01", "due": "2026-09-16", "recv": 0.0, "todel": 300.0, "st": "Late", "days": 1}, {"po": "40008365", "prs": "40004314 / 10", "vendor": "R B Desai & Company - Ah", "item": "Non-woven Fabric Bag Hotel Dust 1 kg [44000058]", "qty": "12000", "val": "117000.00", "date": "2026-09-02", "due": "2026-09-22", "recv": 0.0, "todel": 12000.0, "st": "Open", "days": -5}, {"po": "40008365", "prs": "40004314 / 30", "vendor": "R B Desai & Company - Ah", "item": "Non Woven Fabric Bag Special Dust 1 kg [44000049]", "qty": "4000", "val": "39000.00", "date": "2026-09-02", "due": "2026-09-22", "recv": 0.0, "todel": 4000.0, "st": "Open", "days": -5}, {"po": "40008385", "prs": "40004321 / 20", "vendor": "Vardhaman Packaging Indu", "item": "Carton Family Elaichi Standi Pouch 500gm [44000154]", "qty": "800", "val": "61448.00", "date": "2026-09-03", "due": "2026-09-18", "recv": 0.0, "todel": 800.0, "st": "Open", "days": -1}, {"po": "40008385", "prs": "40004321 / 30", "vendor": "Vardhaman Packaging Indu", "item": "Carton Family Elaichi 250 gm Box  M [44000252]", "qty": "800", "val": "38152.00", "date": "2026-09-03", "due": "2026-09-18", "recv": 0.0, "todel": 800.0, "st": "Open", "days": -1}, {"po": "40008389", "prs": "40004324 / 10", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Special Dust- 1 KG. [44000037]", "qty": "500", "val": "11510.00", "date": "2026-09-07", "due": "2026-09-22", "recv": 0.0, "todel": 500.0, "st": "Open", "days": -5}, {"po": "40008389", "prs": "40004324 / 20", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Amruta Golden Dust [44000275]", "qty": "500", "val": "8155.00", "date": "2026-09-07", "due": "2026-09-22", "recv": 0.0, "todel": 500.0, "st": "Open", "days": -5}, {"po": "40008389", "prs": "40004324 / 40", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Amruta Royal Blend� [44000290]", "qty": "500", "val": "8155.00", "date": "2026-09-07", "due": "2026-09-22", "recv": 434.0, "todel": 66.0, "st": "Open", "days": -5}, {"po": "40008390", "prs": "40004324 / 30", "vendor": "Pradeep Polyflex Pvt Ltd", "item": "Poly Film Amruta Royal Blend MRP 10 Rs [44000283]", "qty": "400", "val": "110000.00", "date": "2026-09-07", "due": "2026-09-28", "recv": 0.0, "todel": 400.0, "st": "Open", "days": -11}, {"po": "40008391", "prs": "40004324 / 50", "vendor": "Walunj Enterprises -", "item": "Fevicol [70050011]", "qty": "100", "val": "35600.00", "date": "2026-09-07", "due": "2026-09-14", "recv": 0.0, "todel": 100.0, "st": "Late", "days": 3}, {"po": "40008399", "prs": "40004328 / 30", "vendor": "Shubham Packaging Indust", "item": "HDPE BAG HOTEL DUST  1 Kg [44000157]", "qty": "1000", "val": "16310.00", "date": "2026-09-09", "due": "2026-09-24", "recv": 0.0, "todel": 1000.0, "st": "Open", "days": -7}, {"po": "40008400", "prs": "40004328 / 40", "vendor": "Yuva Polyprint & Packagi", "item": "Polyster  Film Family Elaichi Tea 5 Rs. [44000180]", "qty": "500", "val": "127500.00", "date": "2026-09-09", "due": "2026-09-30", "recv": 0.0, "todel": 500.0, "st": "Open", "days": -13}, {"po": "40008401", "prs": "40004327 / 10", "vendor": "Shree Offset - Sangamner", "item": "Retailer Card (Yellow Card),", "qty": "40000", "val": "33600.00", "date": "2026-09-09", "due": "2026-09-17", "recv": 0.0, "todel": 40000.0, "st": "Open", "days": 0}, {"po": "40008403", "prs": "40004310 / 30", "vendor": "Purva Sales & Services -", "item": "Oil Compressor [71050017]", "qty": "3", "val": "1095.00", "date": "2026-09-09", "due": "2026-09-13", "recv": 0.0, "todel": 3.0, "st": "Late", "days": 4}, {"po": "40008423", "prs": "40004330 / 70", "vendor": "Pelican Telecom Pvt Ltd", "item": "Telephone Instrument_KX-TS500MX [71000584]", "qty": "3", "val": "3000.00", "date": "2026-09-11", "due": "2026-09-15", "recv": 0.0, "todel": 3.0, "st": "Late", "days": 2}, {"po": "40008426", "prs": "40004331 / 30", "vendor": "Shubham Packaging Indust", "item": "HDPE Bag Family Elaichi Tea 5 Rs. [44000022]", "qty": "1000", "val": "16310.00", "date": "2026-09-14", "due": "2026-09-28", "recv": 0.0, "todel": 1000.0, "st": "Open", "days": -11}, {"po": "40008429", "prs": "40004332 / 70", "vendor": "Vardhaman Packaging Indu", "item": "Carton Josh Standi Pouch 500 gm [44000302]", "qty": "600", "val": "46086.00", "date": "2026-09-15", "due": "2026-09-29", "recv": 0.0, "todel": 600.0, "st": "Open", "days": -12}, {"po": "40008431", "prs": "40004333 / 10", "vendor": "Phoenix Industries- Chh.", "item": "Polythene Bag 9.5\" x 14\" [44000147]", "qty": "500", "val": "92645.00", "date": "2026-09-15", "due": "2026-09-30", "recv": 0.0, "todel": 500.0, "st": "Open", "days": -13}, {"po": "40008431", "prs": "40004333 / 20", "vendor": "Phoenix Industries- Chh.", "item": "Polythene Bag 9.5\" x 13\" [44000148]", "qty": "500", "val": "92645.00", "date": "2026-09-15", "due": "2026-09-30", "recv": 0.0, "todel": 500.0, "st": "Open", "days": -13}, {"po": "40008437", "prs": "40004332 / 50", "vendor": "SAJ WATER SERVICES - AHM", "item": "Level Swi. Float [72040094]", "qty": "2", "val": "900.00", "date": "2026-09-15", "due": "2026-09-20", "recv": 0.0, "todel": 2.0, "st": "Open", "days": -3}, {"po": "40008438", "prs": "40004286 / 40", "vendor": "Chandak Machinery & Pipe", "item": "Contact Element [71050061]", "qty": "6", "val": "1050.00", "date": "2026-09-15", "due": "2026-09-09", "recv": 0.0, "todel": 6.0, "st": "Late", "days": 8}, {"po": "40008439", "prs": "40004330 / 10", "vendor": "Kalash Manufacturers & T", "item": "Bouffant Cap [77050001]", "qty": "5000", "val": "5750.00", "date": "2026-09-15", "due": "2026-09-21", "recv": 0.0, "todel": 5000.0, "st": "Open", "days": -4}, {"po": "40008448", "prs": "40004332 / 10", "vendor": "Venkatesh Agencies - San", "item": "Contactor Output 110 V [71050044]", "qty": "4", "val": "7764.00", "date": "2026-09-16", "due": "2026-09-20", "recv": 0.0, "todel": 4.0, "st": "Open", "days": -3}, {"po": "40008449", "prs": "40004334 / 10", "vendor": "Pradeep Polyflex Pvt Ltd", "item": "Poly Film Amruta Golden Dust MRP 10 Rs [44000269]", "qty": "300", "val": "82500.00", "date": "2026-09-16", "due": "2026-10-07", "recv": 0.0, "todel": 300.0, "st": "Open", "days": -20}, {"po": "40008452", "prs": "40004332 / 20", "vendor": "Balaji Packaging Machine", "item": "Silencer Brass [71050213]", "qty": "12", "val": "840.00", "date": "2026-09-16", "due": "2026-09-25", "recv": 0.0, "todel": 12.0, "st": "Open", "days": -8}, {"po": "40008452", "prs": "40004332 / 30", "vendor": "Balaji Packaging Machine", "item": "Joint 6mm x 8mm [71050208]", "qty": "12", "val": "720.00", "date": "2026-09-16", "due": "2026-09-25", "recv": 0.0, "todel": 12.0, "st": "Open", "days": -8}, {"po": "40008452", "prs": "40004332 / 40", "vendor": "Balaji Packaging Machine", "item": "Joint 6mm x 6mm [71050209]", "qty": "12", "val": "600.00", "date": "2026-09-16", "due": "2026-09-25", "recv": 0.0, "todel": 12.0, "st": "Open", "days": -8}, {"po": "40008458", "prs": "40004289 / 20", "vendor": "Balaji Packaging Machine", "item": "Contactor Coil Kit [71050021]", "qty": "1", "val": "319.50", "date": "2026-08-08", "due": "2026-09-17", "recv": 0.0, "todel": 1.0, "st": "Open", "days": 0}, {"po": "40008458", "prs": "40004289 / 30", "vendor": "Balaji Packaging Machine", "item": "SOLONOID VALVE  WITH COIL 24 VOLT [71050225]", "qty": "1", "val": "945.00", "date": "2026-08-08", "due": "2026-09-17", "recv": 0.0, "todel": 1.0, "st": "Open", "days": 0}, {"po": "40008458", "prs": "40004289 / 50", "vendor": "Balaji Packaging Machine", "item": "SMPS [72020440]", "qty": "1", "val": "2565.00", "date": "2026-08-08", "due": "2026-08-17", "recv": 0.0, "todel": 1.0, "st": "Late", "days": 31}, {"po": "40008458", "prs": "40004331 / 10", "vendor": "Balaji Packaging Machine", "item": "PLC Fauji Make NA24TPA34BM", "qty": "1", "val": "16650.00", "date": "2026-08-08", "due": "2026-09-17", "recv": 0.0, "todel": 1.0, "st": "Open", "days": 0}, {"po": "40008458", "prs": "40004331 / 20", "vendor": "Balaji Packaging Machine", "item": "Deta Cabel", "qty": "1", "val": "765.00", "date": "2026-08-08", "due": "2026-09-17", "recv": 0.0, "todel": 1.0, "st": "Open", "days": 0}, {"po": "40008459", "prs": "40004336 / 10", "vendor": "Nirmal Offset Pvt Ltd -", "item": "Pamphlet(Advt) /Folder [76050008]", "qty": "1050", "val": "8137.50", "date": "2026-09-15", "due": "2026-09-17", "recv": 0.0, "todel": 1050.0, "st": "Open", "days": 0}, {"po": "45000337", "prs": "", "vendor": "Malpani Bajaj- Sangamner", "item": "Insurance Charges(Reimburse)", "qty": "1", "val": "6190.00", "date": "2026-04-10", "due": "2026-04-12", "recv": 0.0, "todel": 1.0, "st": "Late", "days": 158}, {"po": "45000342", "prs": "", "vendor": "Malpani Bajaj- Sangamner", "item": "Full Face Helmet", "qty": "2", "val": "762.72", "date": "2026-05-29", "due": "2026-06-06", "recv": 0.0, "todel": 2.0, "st": "Late", "days": 103}, {"po": "45000352", "prs": "45000429 / 30", "vendor": "Sudarshan Enterprises -", "item": "Stubborn Strain Remover", "qty": "4", "val": "1152.00", "date": "2026-06-22", "due": "2026-06-28", "recv": 3.0, "todel": 1.0, "st": "Late", "days": 81}, {"po": "45000385", "prs": "45000451 / 10", "vendor": "New Madhav Cycle Mart -", "item": "Water Purifier with Pre Filter", "qty": "1", "val": "12542.41", "date": "2026-08-27", "due": "2026-08-31", "recv": 0.0, "todel": 1.0, "st": "Late", "days": 17}, {"po": "45000393", "prs": "45000454 / 10", "vendor": "Laxmi Steel - Sangamner", "item": "MS Angle 25x25x3mm", "qty": "15", "val": "825.00", "date": "2026-09-02", "due": "2026-09-02", "recv": 13.6, "todel": 1.4, "st": "Late", "days": 15}, {"po": "45000393", "prs": "45000454 / 20", "vendor": "Laxmi Steel - Sangamner", "item": "MS Flat patti 25 x 5 mm", "qty": "8", "val": "440.00", "date": "2026-09-02", "due": "2026-09-02", "recv": 3.8, "todel": 4.2, "st": "Late", "days": 15}, {"po": "45000394", "prs": "45000454 / 30", "vendor": "R K Rathod & Sons New -", "item": "Polypropylene Wheel Movable_2\"", "qty": "4", "val": "490.00", "date": "2026-09-02", "due": "2026-09-04", "recv": 0.0, "todel": 4.0, "st": "Late", "days": 13}, {"po": "45000398", "prs": "45000455 / 10", "vendor": "Bhargab Engineering Work", "item": "Pneumatic Dual stage Tea Tipping Station", "qty": "2", "val": "710600.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 2.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 20", "vendor": "Bhargab Engineering Work", "item": "Belt Conveyor", "qty": "1", "val": "382500.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 30", "vendor": "Bhargab Engineering Work", "item": "Vibratory Sifter (stainless steel)", "qty": "1", "val": "467500.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 40", "vendor": "Bhargab Engineering Work", "item": "Infeed Pendulum Bucket elevators", "qty": "1", "val": "1496000.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 50", "vendor": "Bhargab Engineering Work", "item": "structural platform", "qty": "1", "val": "280500.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 60", "vendor": "Bhargab Engineering Work", "item": "Storage Hopper", "qty": "1", "val": "7947500.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 70", "vendor": "Bhargab Engineering Work", "item": "Two delivery vibro feeder", "qty": "2", "val": "448800.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 2.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 80", "vendor": "Bhargab Engineering Work", "item": "Delivery Pendulum Bucket elevators", "qty": "2", "val": "3553000.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 2.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 90", "vendor": "Bhargab Engineering Work", "item": "Dust Extractor confined to the unit", "qty": "1", "val": "794750.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "45000455 / 100", "vendor": "Bhargab Engineering Work", "item": "Control Panel Box with PLC", "qty": "1", "val": "1542750.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "", "vendor": "Bhargab Engineering Work", "item": "Mobile Hopper", "qty": "1", "val": "1.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000398", "prs": "", "vendor": "Bhargab Engineering Work", "item": "Installation Charges", "qty": "1", "val": "400000.00", "date": "2026-09-08", "due": "2026-12-31", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -105}, {"po": "45000402", "prs": "45000457 / 10", "vendor": "Hi-Pack & Fill Machines", "item": "FFS Machine 4 Track HP-108 With Servo", "qty": "1", "val": "1400000.00", "date": "2026-09-11", "due": "2026-10-20", "recv": 0.0, "todel": 1.0, "st": "Open", "days": -33}];
+const $=id=>document.getElementById(id);
+(function(){
+var _s=localStorage.setItem.bind(localStorage);
+function hitNy(k){return k==="mtc_status_v1"||k==="mtc_custom_status"||k==="mtc_remarks_v1"||k==="mtc_data_v1"}
+localStorage.setItem=function(k,v){
+try{_s(k,v)}catch(e){}
+if(hitNy(k)){try{if(window.Cloudmod){Cloudmod.bump()}}catch(e2){}}
+};
+})();
+function safeArr(v){return Array.isArray(v)?v:[]}
+function safeObj(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function inr(n){n=+n||0;return '\u20B9'+Math.round(n).toLocaleString('en-IN')}
+function short(n){n=+n||0;if(n>=1e7)return '\u20B9'+(n/1e7).toFixed(2)+' Cr';if(n>=1e5)return '\u20B9'+(n/1e5).toFixed(1)+' L';if(n>=1e3)return '\u20B9'+(n/1e3).toFixed(1)+'k';return inr(n)}
+function dstr(s){if(!s)return '-';const m={'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec'};const p=s.split('-');return p[2].replace(/^0/,'')+' '+m[p[1]]+' '+p[0]}
+function init(s){return s.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400)}
+if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('error',function(e){try{if(e&&e.message)toast('Page error: '+e.message)}catch(_){}});
+function slab(v){v=+v||0;if(v<=100000)return 'Desk review';if(v<=500000)return 'Plant review';return 'Director review'}
+function f2(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+function ranges(){const t=new Date(TODAY+'T00:00:00'),y=t.getFullYear(),m=t.getMonth();const dow=(t.getDay()+6)%7;const w0=new Date(y,m,t.getDate()-dow),w1=new Date(y,m,t.getDate()-dow+6);const m0=new Date(y,m,1),m1=new Date(y,m+1,0);const qm=Math.floor(m/3)*3,q0=new Date(y,qm,1),q1=new Date(y,qm+3,0);const p0=new Date(w0);p0.setDate(p0.getDate()-7);const p1=new Date(w0);p1.setDate(p1.getDate()-1);return {week:[f2(w0),f2(w1),'This Week','last week'],month:[f2(m0),f2(m1),'This Month','last month'],quarter:[f2(q0),f2(q1),'This Quarter','last quarter'],pweek:[f2(p0),f2(p1)],pmonth:[f2(new Date(y,m-1,1)),f2(new Date(y,m,0))],pquarter:[f2(new Date(y,qm-3,1)),f2(new Date(y,qm,0))]}}
+let cur='month';
+function inR(o,a,b){return o.date>=a&&o.date<=b}
+function sums(list){let v=0;for(const o of list)v+=+o.val||0;return v}
+function delta(c,p,suf){if(!p)return 'vs '+suf+': new (no base)';const d=(c-p)/p*100;const cls=d>=0?'up':'down';const ar=d>=0?'\u25B2':'\u25BC';return 'vs '+suf+': <span class="'+cls+'">'+ar+' '+Math.abs(d).toFixed(0)+'%</span>'}
+function stats(r){const R=ranges();const[a,b,name,pname]=R[r];const[pa,pb]=R['p'+r];const L=DATA.filter(o=>inR(o,a,b));const P=DATA.filter(o=>inR(o,pa,pb));
+const dL=L.filter(o=>o.recv>0),dP=P.filter(o=>o.recv>0),oL=L.filter(o=>o._st==='Open'),oP=P.filter(o=>o._st==='Open');
+$('s1n').textContent=L.length+' lines';$('s1v').textContent=short(sums(L))+' ('+new Set(L.map(o=>o.po)).size+' POs)';$('s1d').innerHTML=delta(L.length,P.length,pname);
+$('s2n').textContent=dL.length+' lines';$('s2v').textContent=short(sums(dL))+' received partly';$('s2d').innerHTML=delta(dL.length,dP.length,pname);
+$('s3n').textContent=oL.length+' lines';$('s3v').textContent=short(sums(oL))+' in transit';$('s3d').innerHTML=delta(oL.length,oP.length,pname);
+renderDynStats(L,P,pname);
+$('subtitle').textContent=dstr(TODAY)+' - '+name+': '+L.length+' PO lines - '+new Set(L.map(o=>o.po)).size+' POs - '+short(sums(L))+' - '+DATA.length+' lines total - '+short(sums(DATA))+' - Data: '+IMPORT_D;$('srcfoot').innerHTML='SAP ME2N export<br>'+IMPORT_D+'<br><span style="opacity:.65">build '+BUILD+'</span>';}
+function renderDynStats(L,P,pname){const g={};L.forEach(o=>{const s=o._st||o.st;if(s==='Open'||s==='Late'||s==='Received')return;(g[s]=g[s]||{c:0,v:0});g[s].c++;g[s].v+=+o.val||0});const gp={};P.forEach(o=>{const s=o._st||o.st;if(s==='Open'||s==='Late'||s==='Received')return;(gp[s]=gp[s]||{c:0,v:0});gp[s].c++;gp[s].v+=+o.val||0});const keys=Object.keys(g).sort();$('dynStats').innerHTML=keys.map(k=>{const c=g[k]||{c:0,v:0},pp=gp[k]||{c:0,v:0};return '<div class="stat"><div class="lbl">'+esc(k).toUpperCase()+'</div><div class="big">'+c.c+' lines</div><div class="val">'+short(c.v)+'</div><div class="delta">'+delta(c.c,pp.c,pname)+'</div></div>'}).join('')}
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');cur=c.dataset.r;stats(cur)});
+$('q').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();renderFollowups(q)});
+function spend(){const ms=[];const bt=new Date(TODAY+'T00:00:00'),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];for(let k=7;k>=0;k--){const d=new Date(bt.getFullYear(),bt.getMonth()-k,1);const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');let v=0;DATA.forEach(o=>{if(o.date.indexOf(key)===0)v+=+o.val||0});ms.push([key,mn[d.getMonth()],v])}
+const W=620,H=250,pad=34,bw=44,gap=(W-pad*2)/8;const mx=Math.max(...ms.map(m=>m[2]));let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+s+='<line x1="'+pad+'" y1="10" x2="'+pad+'" y2="'+(H-34)+'" stroke="#e3e8e3"/>';s+='<line x1="'+pad+'" y1="'+(H-34)+'" x2="'+(W-8)+'" y2="'+(H-34)+'" stroke="#e3e8e3"/>';
+ms.forEach((m,i)=>{const h=m[2]?Math.max(10,(m[2]/mx)*(H-90)):2;const x=pad+i*gap+(gap-bw)/2;const y=H-34-h;const f=i%2?'#3D9D5F':'#1E6F3C';const lbl=m[2]>=1e7?'\u20B9'+(m[2]/1e7).toFixed(2)+' Cr':(m[2]>=1e5?'\u20B9'+(m[2]/1e5).toFixed(1)+' L':(m[2]?'\u20B9'+Math.round(m[2]/1000)+'k':''));s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw+'" height="'+h.toFixed(1)+'" rx="12" fill="'+f+'"><title>'+m[1]+': '+inr(m[2])+'</title></rect>';if(lbl)s+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(y-6).toFixed(1)+'" font-size="10.5" font-weight="700" fill="#1E6F3C" text-anchor="middle">'+lbl+'</text>';s+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-16)+'" font-size="11.5" fill="#6B7280" text-anchor="middle">'+m[1]+'</text>'});
+$('spend').innerHTML=s+'</svg>'}
+function vendors(){const g={};DATA.forEach(o=>{(g[o.vendor]=g[o.vendor]||{n:0,late:0,open:0,val:0});const v=g[o.vendor];v.n++;v.val+=+o.val||0;if(o._st==='Late')v.late++;if(o._st==='Open')v.open++});
+const top=Object.entries(g).sort((a,b)=>b[1].val-a[1].val).slice(0,6);const pal=['#1E6F3C','#3D9D5F','#0F4D26','#6FCF97','#1E6F3C','#3D9D5F'];
+$('vendors').innerHTML=top.map((e,i)=>{const[name,v]=e;const ot=Math.round((1-v.late/v.n)*100);const chip=v.late===0?'<span class="pill ok">On Track</span>':(v.late/v.n<0.5?'<span class="pill warn">Delayed</span>':'<span class="pill bad">Blocked</span>');return '<div class="vrow"><div class="vlogo" style="background:'+(i%2?'#D9F0E1':'#1E6F3C')+';color:'+(i%2?'#1E6F3C':'#fff')+'">'+init(name)+'</div><div class="grow"><b>'+name+'</b><small>'+v.n+' lines - '+short(v.val)+' - on-time '+ot+'%</small></div><span style="font-size:12px;color:#6B7280">'+v.open+' open</span>'+chip+'</div>'}).join('')}
+function gauge(){const due=DATA.filter(o=>o.due.indexOf(TODAY.slice(0,7))===0);const ok=due.filter(o=>o._st==='Open').length;const p=due.length?ok/due.length:0;const R=80,C=Math.PI*R,f=p*C;const svg='<svg viewBox="0 0 200 122" style="width:280px;max-width:100%"><path d="M20 110 A80 80 0 0 1 180 110" fill="none" stroke="#edf1ed" stroke-width="22" stroke-linecap="round"/><path d="M20 110 A80 80 0 0 1 180 110" fill="none" stroke="#1E6F3C" stroke-width="22" stroke-linecap="round" stroke-dasharray="'+f.toFixed(1)+' 999"/><text x="100" y="92" font-size="30" font-weight="800" text-anchor="middle" fill="#1c2420">'+Math.round(p*100)+'%</text><text x="100" y="108" font-size="10.5" fill="#8a938f" text-anchor="middle">'+ok+' of '+due.length+' due-month lines on track</text></svg>';$('gauge').innerHTML=svg;$('legRecv').textContent='Partial receipts: '+DATA.filter(o=>o.recv>0).length+' lines'}
+/* pending approvals (approve/hold) removed */
+function renderWindows(){const g={};DATA.forEach(o=>{const s=o._st||o.st;(g[s]=g[s]||{n:0,val:0,rows:[]});g[s].n++;g[s].val+=+o.val||0;g[s].rows.push(o)});const keys=Object.keys(g).sort((a,b)=>{const oa=ST_ORD[a]!==undefined?ST_ORD[a]:3,ob=ST_ORD[b]!==undefined?ST_ORD[b]:3;return oa-ob||(a<b?-1:1)});$('winsub').textContent=keys.length+' status windows - live from Update Status ('+DATA.filter(o=>STOV[stKey(o)]).length+' manually set)';$('statusWindows').innerHTML=keys.map(k2=>{const w=g[k2];const rows=w.rows.slice().sort((a,b)=>(+b.val||0)-(+a.val||0)).slice(0,12).map(o=>'<div class="rmrow"><b>PO '+o.po+'</b> <small>'+o.vendor+' - '+o.item.slice(0,40)+'<br>Due '+dstr(o.due)+' - '+short(o.val)+'</small></div>').join('');return '<div class="win"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+stPill(k2)+'<b>'+w.n+' lines</b><span style="flex:1"></span><b style="color:#1E6F3C">'+short(w.val)+'</b></div><div style="max-height:230px;overflow:auto">'+rows+(w.n>12?'<div class="sub">'+(w.n-12)+' more in Update Status</div>':'')+'</div></div>'}).join('')}
+/* status windows - custom statuses also surface as stat cards */
+function renderFollowups(q){q=(q||'').toLowerCase();const list=DATA.map((o,idx)=>({o:o,idx:idx})).filter(x=>x.o._st==='Late').filter(x=>!q||x.o.po.toLowerCase().includes(q)||x.o.vendor.toLowerCase().includes(q)).sort((a,b)=>b.o.days-a.o.days);$('folsub').textContent=list.length+' overdue lines - chase delivery dates, longest wait first';$('followups').innerHTML=list.map(x=>{const o=x.o;const dot=o.days>30?'#D64545':(o.days>=7?'#F0A500':'#3D9D5F');return '<div class="frow"><span class="fdot" style="background:'+dot+'"></span><div class="grow"><b>'+o.vendor+'</b><small>Delivery dt '+dstr(o.due)+' - PO '+o.po+' - '+o.item.slice(0,44)+'</small></div><span style="font-size:11.5px;font-weight:700;color:'+dot+'">'+o.days+'d overdue</span><button class="remind" title="Compose follow-up mail in Outlook" onclick="remind(this,'+x.idx+')">&#9993;</button></div>'}).join('')}
+function buildMailTable(o,rows){
+const codeOf=function(s){const m=String(s).match(/\[([^\]]+)\]\s*$/);return m?m[1]:'-'};
+const nameOf=function(s){return String(s).replace(/\s*\[[^\]]+\]\s*$/,'')};
+let h='<table border="1" cellpadding="6" cellspacing="0" bordercolor="#A6A6A6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;color:#1c2420"><thead><tr>';
+const heads=['PO No','Item Code','Item Name','Order Qty','Recd Qty','Bal Qty'],aligns=['left','left','left','right','right','right'];
+for(let i=0;i<heads.length;i++){h+='<th align="center" bgcolor="#2F75B5" style="background:#2F75B5;color:#ffffff;padding:7px 10px;white-space:nowrap;font-size:12px;border:1px solid #2F75B5">'+heads[i]+'</th>'}
+h+='</tr></thead><tbody>';
+rows.forEach(function(x,i){const last=i===rows.length-1;const bg='#ffffff';const cells=[x.po,codeOf(x.item),nameOf(x.item),x.qty,x.recv,x.todel];h+='<tr>';for(let j=0;j<cells.length;j++){h+='<td align="'+aligns[j]+'" bgcolor="'+bg+'" style="padding:6px 10px;background:'+bg+';border:1px solid #A6A6A6;'+(j>=3?'white-space:nowrap;':'')+(last?'border-bottom:3px solid #2F75B5;':'')+'">'+esc(cells[j])+'</td>'}h+='</tr>'});
+return h+'</tbody></table>';
+}
+async function remind(btn,idx){const o=DATA[idx];const rows=DATA.filter(x=>x.po===o.po);const codeOf=s=>{const m=s.match(/\[([^\]]+)\]\s*$/);return m?m[1]:'-'};const nameOf=s=>s.replace(/\s*\[[^\]]+\]\s*$/,'').slice(0,34);const cleanS=function(s){return String(s).replace(/\s+/g,' ').trim()};
+const fmtQ=function(v){const n=parseFloat(String(v).replace(/,/g,''));if(!isFinite(n))return v;const neg=n<0,a=Math.abs(n);const parts=String(a).split('.');let int=parts[0];const last3=int.slice(-3);let rest=int.slice(0,-3);if(rest){rest=rest.replace(/\B(?=(\d{2})+(?!\d))/g,',');int=rest+','+last3}else{int=last3}return (neg?'-':'')+int+(parts[1]?'.'+parts[1]:'')};
+const cellL=function(s,w){s=cleanS(String(s));if(s.length>w)s=s.slice(0,w);while(s.length<w)s+=' ';return s};
+const cellR=function(s,w){s=cleanS(String(s));if(s.length>w)s=s.slice(0,w);while(s.length<w)s=' '+s;return s};
+const CW=[8,28,8,8,8];
+let barFull='+';for(let bi=0;bi<CW.length;bi++){let sg='';for(let bj=0;bj<CW[bi]+2;bj++)sg+='-';barFull+=sg+'+'}
+const T=[barFull,'| '+cellL('PO No',8)+' | '+cellL('Item Name',28)+' | '+cellR('Ord Qty',8)+' | '+cellR('Recd Qty',8)+' | '+cellR('Bal Qty',8)+' |',barFull];
+rows.forEach(function(x){T.push('| '+cellL(x.po,8)+' | '+cellL(nameOf(x.item),28)+' | '+cellR(fmtQ(x.qty),8)+' | '+cellR(fmtQ(x.recv),8)+' | '+cellR(fmtQ(x.todel),8)+' |')});
+T.push(barFull);T.push('('+rows.length+(rows.length===1?' row)':' rows)'));const sub='Follow-up: PO '+o.po+' dated '+dstr(o.date)+' - delivery overdue by '+o.days+' days ('+o.vendor+')';const body='Dear Sir / Madam,\n\nThis is a follow-up from the Purchase Department, Malpani Tea Corporation. The following material against our purchase order is overdue for delivery.\n\nVendor: '+o.vendor+'\nDelivery Due Date: '+dstr(o.due)+'\nDays Overdue (as on '+dstr(TODAY)+'): '+o.days+'\n\n'+T.join('\n')+'\n\nKindly confirm the revised dispatch / delivery date and share dispatch details (transporter and LR / consignment copy) at the earliest. Please treat this as urgent to avoid packing / production impact.\n\nBest regards,\nSAHIL SAPATE\nPURCHASE ASSOCIATE\nMalpani Products Pvt Ltd | Malpani Group\nSangamner 422605, Maharashtra\nPh no. 9016550082  |  Extn. : 364';const htmlTable=buildMailTable(o,rows);
+let clipOk=false;
+try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([htmlTable],{type:'text/html'}),'text/plain':new Blob([T.join('\n')],{type:'text/plain'})})]);clipOk=true}}catch(e){clipOk=false}
+if(!clipOk){try{const d=document.createElement('div');d.contentEditable='true';d.style.position='fixed';d.style.left='-9999px';d.innerHTML=htmlTable;document.body.appendChild(d);const r=document.createRange();r.selectNodeContents(d);const s=window.getSelection();s.removeAllRanges();s.addRange(r);clipOk=document.execCommand('copy');s.removeAllRanges();document.body.removeChild(d)}catch(e){clipOk=false}}
+let mailBody=body;if(clipOk){const t0=T[0];const cut=body.indexOf(t0);if(cut>=0){mailBody=body.slice(0,cut)+'[Table copied - paste it here with Ctrl+V]\n'+body.slice(cut+T.join('\n').length)}btn.disabled=true;btn.textContent='\u2713'}
+window.location.href='mailto:?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(mailBody);toast(clipOk?('Table copied - Ctrl+V in the mail (PO '+o.po+')'):('Opening Outlook follow-up mail for PO '+o.po))}
+function grn(){const t=DATA.filter(o=>o.due===TODAY);const got=t.filter(o=>o.recv>0).length;$('grnExp').textContent=t.length;$('grnGot').textContent=got;$('grnsub').textContent=dstr(TODAY)+' - '+got+' of '+t.length+' expected lines partially received';$('inwards').innerHTML=t.map(o=>'<div class="inrow"><b>PO '+o.po+' - '+o.vendor+'</b><br><small>'+o.item.slice(0,64)+' - Qty '+o.qty+' - '+short(o.val)+'</small></div>').join('')}
+function xDec(b){try{return new TextDecoder('utf-8').decode(b)}catch(e){let s='';for(let i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return s}}
+function zipFiles(u8){const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);const u16=p=>dv.getUint16(p,true),u32=p=>dv.getUint32(p,true);let eocd=-1;for(let p=u8.length-22;p>=Math.max(0,u8.length-65558);p--){if(u32(p)===0x06054b50){eocd=p;break}}if(eocd<0)return null;const n=u16(eocd+10);let p=u32(eocd+16);const out={};for(let i=0;i<n;i++){if(u32(p)!==0x02014b50)return null;const method=u16(p+10),cs=u32(p+20),nl=u16(p+28),el=u16(p+30),cl=u16(p+32),off=u32(p+42);let nm='';for(let k=0;k<nl;k++)nm+=String.fromCharCode(u8[p+46+k]);if(u32(off)!==0x04034b50)return null;const start=off+30+u16(off+26)+u16(off+28);out[nm]={method:method,data:u8.slice(start,start+cs)};p+=46+nl+el+cl}return out}
+function inflateRaw(d){let pos=0,bitbuf=0,bitcnt=0;const out=[];const LB=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258],LE=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0],DB=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577],DE=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13],CO=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+function bits(n){let v=bitbuf;while(bitcnt<n){if(pos>=d.length)throw 0;v|=d[pos++]<<bitcnt;bitcnt+=8}bitbuf=v>>>n;bitcnt-=n;return v&((1<<n)-1)}
+function mkHuff(lens){const bl=[];let mx=0;for(const l of lens){if(l>mx)mx=l}for(let b=0;b<=mx;b++)bl[b]=0;for(const l of lens)if(l)bl[l]++;const nx=[];let code=0;for(let b=1;b<=mx;b++){code=(code+bl[b-1])<<1;nx[b]=code}const tab={};for(let s=0;s<lens.length;s++){const l=lens[s];if(!l)continue;let c=nx[l]++,rev=0;for(let k=0;k<l;k++){rev=(rev<<1)|(c&1);c>>=1}tab[rev+':'+l]=s}return function(){let c=0,l=0;for(;;){if(bitcnt===0){if(pos>=d.length)throw 0;bitbuf=d[pos++];bitcnt=8}c|=(bitbuf&1)<<l;bitbuf>>=1;bitcnt--;l++;const k=c+':'+l;if(k in tab)return tab[k]}}}
+function runBlock(LT,DT){for(;;){const s=LT();if(s===256)return true;if(s<256){out.push(s);continue}const li=s-257;if(li<0||li>28)return false;const ln=LB[li]+bits(LE[li]);const ds=DT();if(ds<0||ds>29)return false;const dd=DB[ds]+bits(DE[ds]);for(let k=0;k<ln;k++){const v=out[out.length-dd];if(v===undefined)return false;out.push(v)}}}
+try{let fin=false;while(!fin){fin=bits(1)===1;const typ=bits(2);if(typ===0){bitbuf=0;bitcnt=0;const len=d[pos]|(d[pos+1]<<8),nl=d[pos+2]|(d[pos+3]<<8);pos+=4;if((len^0xFFFF)!==nl)return null;for(let k=0;k<len;k++)out.push(d[pos++]);continue}let LT,DT;if(typ===1){const a=new Array(288);for(let i=0;i<144;i++)a[i]=8;for(let i=144;i<256;i++)a[i]=9;for(let i=256;i<280;i++)a[i]=7;for(let i=280;i<288;i++)a[i]=8;LT=mkHuff(a);DT=mkHuff(new Array(32).fill(5))}else if(typ===2){const HL=bits(5)+257,HD=bits(5)+1,HC=bits(4)+4;const cl=new Array(19).fill(0);for(let i=0;i<HC;i++)cl[CO[i]]=bits(3);const CT=mkHuff(cl);const lens=[];while(lens.length<HL+HD){const s=CT();if(s<=15)lens.push(s);else if(s===16){const r=3+bits(2),v=lens[lens.length-1];for(let k=0;k<r;k++)lens.push(v)}else if(s===17){const r=3+bits(3);for(let k=0;k<r;k++)lens.push(0)}else{const r=11+bits(7);for(let k=0;k<r;k++)lens.push(0)}}LT=mkHuff(lens.slice(0,HL));DT=mkHuff(lens.slice(HL))}else return null;if(!runBlock(LT,DT))return null}}catch(e){return null}return new Uint8Array(out)}
+function xUnesc(s){return s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#(\d+);/g,(m,n)=>String.fromCharCode(+n)).replace(/&#x([0-9a-fA-F]+);/g,(m,h)=>String.fromCharCode(parseInt(h,16))).replace(/&amp;/g,'&')}
+function xlsxToRows(u8){const z=zipFiles(u8);if(!z)return null;function file(n){const e=z[n];if(!e)return null;let b=e.data;if(e.method===8){b=inflateRaw(b);if(!b)return null}return xDec(b)}
+const wb=file('xl/workbook.xml');if(!wb)return null;const sm=wb.match(/<sheet\b([^>]*?)\/?>/);if(!sm)return null;const sid=(sm[1].match(/(?:r:)?id="([^"]+)"/)||[])[1];const rels=file('xl/_rels/workbook.xml.rels')||'';let tgt='worksheets/sheet1.xml';if(sid){const esc=sid.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const rm=rels.match(new RegExp('<Relationship[^>]*Id="'+esc+'"[^>]*Target="([^"]+)"'));if(rm)tgt=rm[1]}let sh=file('xl/'+tgt);if(!sh)sh=file(tgt);if(!sh)return null;const d1904=/date1904="1"/.test(wb);
+let ss=[];const sst=file('xl/sharedStrings.xml');if(sst){const re=/<si>([\s\S]*?)<\/si>/g;let m;while((m=re.exec(sst))){const parts=[],rt=/<t[^>]*>([\s\S]*?)<\/t>/g;let t2;while((t2=rt.exec(m[1])))parts.push(t2[1]);ss.push(xUnesc(parts.join('')))}}
+const BID={14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,27:1,28:1,29:1,30:1,31:1,32:1,33:1,34:1,35:1,36:1,45:1,46:1,47:1,50:1,57:1,58:1};const stx=file('xl/styles.xml')||'';const codes={};let fm;const fre=/<numFmt[^>]*numFmtId="(\d+)"[^>]*formatCode="([^"]*)"/g;while((fm=fre.exec(stx))){codes[fm[1]]=/[dmy]/i.test(fm[2].replace(/\[.*?\]/g,''))?1:0}
+const sty=[];const xfsm=stx.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);if(xfsm){const xre=/<xf\b[^>]*numFmtId="(\d+)"[^>]*\/?>/g;let xm;while((xm=xre.exec(xfsm[1])))sty.push(xm[1] in codes?codes[xm[1]]:(BID[xm[1]]?1:0))}
+function colIdx(a){let n=0;for(const ch of a)n=n*26+(ch.charCodeAt(0)-64);return n-1}
+function xDate(v){let n=+v;if(!(n>0))return v;if(d1904)n+=1462;const t=Date.UTC(1899,11,30)+Math.round(n*864e5);const dd=new Date(t);const p=x=>String(x).padStart(2,'0');return p(dd.getUTCDate())+'.'+p(dd.getUTCMonth()+1)+'.'+dd.getUTCFullYear()}
+const rows=[];const rre=/<row\b[^>]*>([\s\S]*?)<\/row>/g;let rm2;while((rm2=rre.exec(sh))){const rec=[];const cre=/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;let cm;while((cm=cre.exec(rm2[1]))){const at=cm[1],inner=cm[2]||'';const rr=(at.match(/\br="([A-Z]+)\d+"/)||[])[1];if(!rr)continue;const tt=(at.match(/\bt="([a-zA-Z]+)"/)||[])[1]||'';const si=at.match(/\bs="(\d+)"/);let v='';const vm=inner.match(/<v>([\s\S]*?)<\/v>/);const tml=tt.toLowerCase();if(tml==='s'){v=ss[+(vm?vm[1]:-1)]||''}else if(tml==='inlineStr'||tml==='str'){const im=inner.match(/<t[^>]*>([\s\S]*?)<\/t>/);v=xUnesc(im?im[1]:'')}else if(tml==='b'){v=(vm&&vm[1]==='1')?'TRUE':'FALSE'}else if(vm){v=vm[1];if(si&&sty[+si[1]])v=xDate(v)}else{const im=inner.match(/<t[^>]*>([\s\S]*?)<\/t>/);if(im)v=xUnesc(im[1])}rec[colIdx(rr)]=v}
+let any=false;for(const k in rec){if(rec[k]!==''&&rec[k]!==undefined){any=true;break}}if(any)rows.push(rec)}
+return rows.map(r=>{const a=[];for(let i=0;i<r.length;i++)a[i]=r[i]||'';return a})}
+function b64(u8){let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s)}
+function unb64(s){const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function splitCells(text,d){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c}else{if(c==='"'&&cur==='')q=true;else if(c===d){row.push(cur);cur=''}else if(c==='\r'){}else if(c==='\n'){row.push(cur);cur='';if(row.length>1||row[0]!=='')rows.push(row);row=[]}else cur+=c}}if(cur!==''||row.length){row.push(cur);rows.push(row)}return rows}
+function parseTSV(text){text=String(text||'');if(text.charCodeAt(0)===80&&text.charCodeAt(1)===75){toast('That is an Excel (.xlsx) file - open it in Excel, Save As CSV, then import that CSV');return null}if(text.indexOf(' ')>=0){let s='';for(let i=0;i<text.length;i+=2)s+=text[i];text=s}text=text.replace(/^﻿/,'');const sample=text.split(/\r?\n/).slice(0,5).join('\n');let d='\t',best=0;['\t',',',';','|'].forEach(x=>{const n=sample.split(x).length-1;if(n>best){best=n;d=x}});if(best<3){toast('No columns detected - is this the ME2N export?');return null}const rows=splitCells(text,d);return rowsToRecords(rows)}
+function rowsToRecords(rows){let hi=-1;for(let i=0;i<Math.min(15,rows.length);i++){if(rows[i].join(' ').toLowerCase().indexOf('pur. doc.')>=0){hi=i;break}}if(hi<0){toast('Header row with Pur. Doc. not found in the first 15 rows');return null}const H=rows[hi].map(s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim());const col=function(){for(let k=0;k<arguments.length;k++){const i=H.indexOf(arguments[k]);if(i>=0)return i}return -1};const cPO=col('pur. doc.');if(cPO<0){toast('Pur. Doc. column missing');return null}const cSup=col('name of supplier'),cDate=col('doc. date'),cDue=col('deliv.date','deliv. date'),cMat=col('material'),cTxt=col('short text'),cQty=col('quantity'),cRecv=col('received'),cTodel=col('to be del.'),cToinv=col('to be inv.'),cVal=col('net value'),cPRS=col('purch.req.','purch. req.'),cStat=col('statdeld'),cPlnt=col('plnt','plant','plant code','werks');const cPRI=(cPRS>=0&&H[cPRS+1]==='item')?cPRS+1:-1;const iso=s=>{s=(s||'').trim();const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?m[3]+'-'+m[2]+'-'+m[1]:''};const num=s=>(s||'').trim().replace(/,/g,'');const G={sup:cSup,po:cPO,dt:cDate,du:cDue,mt:cMat,tx:cTxt,qt:cQty,rc:cRecv,td:cTodel,ti:cToinv,vl:cVal,pr:cPRS,pi:cPRI,st:cStat,pl:cPlnt};const gv=(r,i)=>i>=0?(r[i]||''):'';const out=[];for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!/^\d+$/.test(gv(r,G.po).trim()))continue;const recv=parseFloat(num(gv(r,G.rc)))||0,todel=parseFloat(num(gv(r,G.td)))||0;const due=iso(gv(r,G.du))||iso(gv(r,G.st));const dt=new Date((due||TODAY)+'T00:00:00'),td=new Date(TODAY+'T00:00:00');let s2='Open';if(todel===0&&recv>0)s2='Received';else if(dt<td)s2='Late';const mat=gv(r,G.mt).trim(),sh=gv(r,G.tx).trim();out.push({po:gv(r,G.po).trim(),prs:gv(r,G.pr).trim()?(gv(r,G.pr).trim()+(gv(r,G.pi).trim()?' / '+gv(r,G.pi).trim():'')):'',vendor:gv(r,G.sup).trim().replace(/^\d+\s+/,'')||gv(r,G.sup).trim(),item:sh+(mat?' ['+mat+']':''),qty:num(gv(r,G.qt)),val:num(gv(r,G.vl)),date:iso(gv(r,G.dt)),due:due,recv:recv,todel:todel,plant:gv(r,G.pl).trim(),st:s2,days:Math.round((td-dt)/86400000)})}return out}
+/* ===== Update Status - single implementation (table + filters + sort + customs) ===== */
+/* ===== Update Status : items table, filters, sorting, custom statuses ===== */
+let STOV={};try{const _s=JSON.parse(localStorage.getItem('mtc_status_v1'));const _so=safeObj(_s);if(_s!=null&&_so!==_s)toast('Saved statuses were unreadable - reset to auto');STOV=_so}catch(e){STOV={}}
+let CUSTOM=[];try{const _c=JSON.parse(localStorage.getItem('mtc_custom_status'));const _ca=safeArr(_c);if(_c!=null&&_ca!==_c)toast('Saved custom statuses were unreadable - cleared');CUSTOM=_ca}catch(e){CUSTOM=[]}
+function stKey(o){return o.po+'|'+o.item}
+function applyOverrides(){for(const o of DATA){o._st=STOV[stKey(o)]||o.st}}
+function persistST(){try{localStorage.setItem('mtc_status_v1',JSON.stringify(STOV))}catch(e){}}
+function showView(v){try{const s=v==='status';const vd=$('view-dash'),vs=$('view-status');if(!vd||!vs){toast('Status view is missing - hard-refresh (Ctrl+Shift+R)');return}vd.style.display=s?'none':'';vs.style.display=s?'':'none';$('navDash').classList.toggle('active',!s);$('navStatus').classList.toggle('active',s);if(s){renderStatus(($('sq').value||'').trim().toLowerCase());toast('Update Status - '+DATA.length+' item lines')}}catch(e){toast('Status view failed: '+((e&&e.message)||e))}}
+function stPill(s){return s==='Received'?'<span class="pill ok">Received</span>':(s==='Late'?'<span class="pill bad">Late</span>':(s==='Open'?'<span class="pill warn">Open</span>':'<span class="pill" style="background:#e8ebf0;color:#3c4642">'+esc(s)+'</span>'))}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function saveCustom(){try{localStorage.setItem('mtc_custom_status',JSON.stringify(CUSTOM))}catch(e){}}
+function renderCustomChips(){const _cc=$('customChips');if(!_cc)return;_cc.innerHTML=CUSTOM.map(c=>'<span class="routed">'+esc(c)+' <b onclick="delCustom(\''+c+'\')" style="cursor:pointer;color:#D64545">×</b></span>').join('')}
+function addCustom(){const v=($('newSt').value||'').trim().replace(/\s+/g,' ');if(!/^[A-Za-z0-9 \-\/]{2,24}$/.test(v)){toast('Use 2-24 chars: letters, numbers, space, - or /');return}if(['open','late','received'].indexOf(v.toLowerCase())>=0||CUSTOM.some(c=>c.toLowerCase()===v.toLowerCase())){toast('That status already exists');return}CUSTOM.push(v);saveCustom();$('newSt').value='';renderCustomChips();renderStatus(($('sq').value||'').trim().toLowerCase());toast('Status "'+v+'" added - pick it in any row')}
+function delCustom(v){CUSTOM=CUSTOM.filter(c=>c!==v);let n=0;for(const k in STOV){if(STOV[k]===v){delete STOV[k];n++}}saveCustom();persistST();applyOverrides();refreshAll();renderCustomChips();renderStatus(($('sq').value||'').trim().toLowerCase());toast('Status removed'+(n?(', '+n+' rows back to auto'):''))}
+let ST_SORT={k:'due',d:1},ST_FST='',ST_FV='';
+let PLANT_F='';try{const _pf=localStorage.getItem('mtc_plant_f');if(typeof _pf==='string')PLANT_F=_pf}catch(e){}
+function setPlant(v){PLANT_F=v||'';try{localStorage.setItem('mtc_plant_f',PLANT_F)}catch(e){}try{renderStatus((($('sq')||{value:''}).value||'').trim().toLowerCase())}catch(e){}}
+function renderPlantFilter(){
+let sel=null;try{sel=$('fqPlant')}catch(e){}
+const seen={},order=[];
+for(const o of DATA){const p=(o.plant||'').trim();if(!p)continue;if(!seen[p]){seen[p]=1;order.push(p)}}
+order.sort();
+if(PLANT_F&&order.indexOf(PLANT_F)<0){PLANT_F=order.length?order[0]:''}
+if(!PLANT_F&&order.length){PLANT_F=order[0]}
+try{localStorage.setItem('mtc_plant_f',PLANT_F)}catch(e){}
+if(!sel)return;
+if(!order.length){sel.innerHTML='<option value="">No plant data</option>';try{sel.value=''}catch(e){}return}
+sel.innerHTML=order.map(function(p){return '<option value="'+esc(p)+'"'+(PLANT_F===p?' selected':'')+'>Plant '+esc(p)+'</option>'}).join('');
+try{sel.value=PLANT_F}catch(e){}
+}
+const ST_COLS={po:'PO / PRS',item:'Item / Vendor',due:'Due / PO date',qty:'Qty Ord / Recv-Bal',val:'Value',est:'Auto / Status'};
+const ST_ORD={Open:0,Late:1,Received:2};
+function stOrd(s){return ST_ORD[s]!==undefined?ST_ORD[s]:3}
+function setStF(w,v){if(w==='st')ST_FST=v;else ST_FV=v;renderStatus(($('sq').value||'').trim().toLowerCase())}
+function stSort(k){if(ST_SORT.k===k)ST_SORT.d*=-1;else ST_SORT={k:k,d:1};renderStatus(($('sq').value||'').trim().toLowerCase());try{const _ms=$('mSort');if(_ms)_ms.value=ST_SORT.k}catch(e){}}
+function renderStatus(q){renderPlantFilter();q=(q||'').toLowerCase();let list=DATA.map((o,idx)=>({o:o,idx:idx})).filter(x=>!q||x.o.po.toLowerCase().includes(q)||(x.o.prs||'').toLowerCase().includes(q)||x.o.vendor.toLowerCase().includes(q)||x.o.item.toLowerCase().includes(q)||((x.o.plant||'').toLowerCase().includes(q)));if(ST_FV)list=list.filter(x=>x.o.vendor===ST_FV);if(PLANT_F){list=list.filter(x=>((x.o.plant||'').trim())===PLANT_F)}if(ST_FST==='MANUAL')list=list.filter(x=>STOV[stKey(x.o)]);else if(ST_FST)list=list.filter(x=>(x.o._st||x.o.st)===ST_FST);const K=ST_SORT.k,D=ST_SORT.d;const gv=x=>{if(K==='po')return x.o.po;if(K==='prs')return (x.o.prs||'');if(K==='vendor')return x.o.vendor;if(K==='item')return x.o.item;if(K==='date')return x.o.date;if(K==='due')return x.o.due;if(K==='qty')return (+x.o.qty||0);if(K==='val')return (+x.o.val||0);if(K==='recv')return (+x.o.recv||0);if(K==='todel')return (+x.o.todel||0);if(K==='days')return (+x.o.days||0);if(K==='auto')return stOrd(x.o.st);return stOrd(x.o._st||x.o.st);};list=list.slice().sort((a,b)=>{const va=gv(a),vb=gv(b);return(typeof va==='number'?va-vb:String(va).localeCompare(String(vb)))*D});const vsel=$('fqVendor'),curV=ST_FV;const allV=[...new Set(DATA.map(o=>o.vendor))].sort();vsel.innerHTML='<option value="">All vendors</option>'+allV.map(v=>'<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===curV?' selected':'')+'>'+v+'</option>').join('');if(curV&&allV.indexOf(curV)<0)ST_FV='';const fss=$('fqStatus');let fh=fss.innerHTML,ch=false;CUSTOM.forEach(c=>{if(fh.indexOf('value="'+c+'"')<0){fh+='<option value="'+esc(c)+'">'+esc(c)+'</option>';ch=true}});if(ch)fss.innerHTML=fh;fss.value=ST_FST;const nMan=DATA.filter(o=>STOV[stKey(o)]).length;$('stsub').textContent=list.length+' of '+DATA.length+' shown - '+nMan+' manually set - click a header to sort';const ths=document.querySelectorAll('#sttable th[data-k]');for(let ti=0;ti<ths.length;ti++){const kk=ths[ti].getAttribute('data-k');ths[ti].innerHTML=ST_COLS[kk]+(ST_SORT.k===kk?(ST_SORT.d>0?' ▲':' ▼'):' <span style="opacity:.3;font-size:10px">▲▼</span>')}$('stlist').innerHTML=list.map(x=>{const o=x.o,cur=STOV[stKey(o)]||'',eff=o._st||o.st;const sel=v=>'<option value="'+v+'"'+(cur===v?' selected':'')+'>'+(v||'Auto ('+o.st+')')+'</option>';const selCustom=CUSTOM.map(c=>'<option value="'+esc(c)+'"'+(cur===c?' selected':'')+'>'+esc(c)+'</option>').join('');return '<tr'+(cur?' class="man"':'')+'><td><b>'+o.po+'</b><br><small class="mut">'+(o.prs||'-')+'</small>'+(o.plant?'<br><small class="mut">Plnt: '+esc(o.plant)+'</small>':'')+'</td><td><b>'+esc(o.item)+'</b><br><small class="mut">'+esc(o.vendor)+'</small></td><td style="white-space:nowrap"><b>'+dstr(o.due)+'</b><br><small class="mut">PO '+dstr(o.date)+'</small><br><span style="font-size:11px;font-weight:700;color:'+(o.days>30?'#D64545':(o.days>0?'#F0A500':'#1E6F3C'))+'">'+(o.days>0?o.days+'d late':(o.days===0?'due today':Math.abs(o.days)+'d left'))+'</span></td><td class="num" style="white-space:nowrap"><b>'+o.qty+'</b><br><small class="mut">R '+o.recv+' &bull; B '+o.todel+'</small></td><td class="num" style="white-space:nowrap"><b>'+short(o.val)+'</b></td><td>'+stPill(o.st)+'<div style="height:5px"></div>'+stPill(eff)+'</td><td><select class="stsel" onchange="setSt('+x.idx+',this.value)">'+sel('')+sel('Open')+sel('Received')+sel('Late')+selCustom+'<option value="__ADD__">+ Add custom…</option></select></td></tr>'}).join('')||'<tr><td colspan="7" style="text-align:center;color:#8a938f;padding:22px">No lines match the current search / filters - clear them to see all lines</td></tr>'}
+function setSt(idx,v){const o=DATA[idx];if(!o){toast('Row not found - please re-import the file');return}const k=stKey(o);if(v==='__ADD__'){let n=null;try{n=typeof prompt==='function'?prompt('New custom status (2-24 chars: letters, numbers, space, - or /):'):null}catch(e){n=null}if(n==null){renderStatus(($('sq').value||'').trim().toLowerCase());return}const name=String(n).trim().replace(/\s+/g,' ');if(!/^[A-Za-z0-9 \-\/]{2,24}$/.test(name)){toast('Use 2-24 chars: letters, numbers, space, - or /')}else if(['open','late','received'].indexOf(name.toLowerCase())>=0||CUSTOM.some(c=>c.toLowerCase()===name.toLowerCase())){toast('That status already exists')}else{CUSTOM.push(name);saveCustom();renderCustomChips();STOV[k]=name;persistST();applyOverrides();refreshAll();toast('Status "'+name+'" added and set on PO '+o.po)}renderStatus(($('sq').value||'').trim().toLowerCase());return}if(!v)delete STOV[k];else STOV[k]=v;persistST();applyOverrides();refreshAll();renderStatus(($('sq').value||'').trim().toLowerCase());toast(v?('PO '+o.po+' set to '+v):('PO '+o.po+' back to auto'))}
+function resetOverrides(){STOV={};try{localStorage.removeItem('mtc_status_v1')}catch(e){}applyOverrides();refreshAll();$('sq').value='';renderStatus('');toast('All statuses back to auto')}
+/* ===== end Update Status ===== */
+
+function refreshAll(){applyOverrides();stats(cur);spend();vendors();gauge();renderFollowups($('q').value.trim().toLowerCase());renderWindows()}
+function loadRemarks(){try{return safeArr(JSON.parse(localStorage.getItem('mtc_remarks_v1')))}catch(e){return[]}}
+function renderRemarks(){const R=loadRemarks().sort((a,b)=>String(b.d).localeCompare(String(a.d)));$('remarks').innerHTML=R.length?R.map(r=>'<div class="rmrow"><b>'+String(r.d).split('-').reverse().join('/')+'</b> <small>'+String(r.t).replace(/</g,'&lt;')+'</small><br><button class="mini h" style="padding:3px 9px;font-size:11px;margin-top:4px" onclick="delRemark('+r.id+')">Delete</button></div>').join(''):'<div class="sub">No remarks yet - saved in this browser only.</div>'}
+function saveRemark(){const d=$('rmDate').value||TODAY,t=$('rmText').value.trim();if(!t){toast('Type a remark first');return}const R=loadRemarks();R.push({id:Date.now(),d:d,t:t});try{localStorage.setItem('mtc_remarks_v1',JSON.stringify(R))}catch(e){}$('rmText').value='';renderRemarks();toast('Remark saved for '+d)}
+function delRemark(id){try{localStorage.setItem('mtc_remarks_v1',JSON.stringify(loadRemarks().filter(r=>r.id!==id)))}catch(e){}renderRemarks();toast('Remark deleted')}
+try{const _cc=JSON.parse(localStorage.getItem('mtc_cloud_data'));if(_cc&&Array.isArray(_cc.data)&&_cc.data.length){DATA=_cc.data;IMPORT_D='shared cloud data ('+_cc.data.length+' lines)'}}catch(e){}
+let _stored=null;try{_stored=JSON.parse(localStorage.getItem('mtc_data_v1'))}catch(e){}if(_stored&&(_stored.tsv||_stored.payload)){try{if(typeof _stored.tsv==='string'){const _p=parseTSV(_stored.tsv);if(_p&&_p.length){DATA=_p;IMPORT_D=String(_stored.d||IMPORT_D)}}else if(_stored.kind==='xlsx'&&typeof _stored.payload==='string'){const _xr=xlsxToRows(unb64(_stored.payload));const _p=_xr?rowsToRecords(_xr):null;if(_p&&_p.length){DATA=_p;IMPORT_D=String(_stored.d||IMPORT_D)}}else if(typeof _stored.payload==='string'){const _p=parseTSV(_stored.payload);if(_p&&_p.length){DATA=_p;IMPORT_D=String(_stored.d||IMPORT_D)}}else{toast('Saved import was unreadable - using built-in data')}}catch(err){}}
+$('filepick').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const buf=new Uint8Array(rd.result||[]);const isX=buf[0]===80&&buf[1]===75;let recs=null;if(isX){const xr=xlsxToRows(buf);if(!xr){toast('Could not read that Excel file - open it in Excel, Save As CSV and import that');return}recs=rowsToRecords(xr);if(!recs||!recs.length){toast('No PO lines found in that Excel sheet');return}}else{let tx='';try{tx=new TextDecoder('utf-8').decode(buf)}catch(err){tx=String.fromCharCode.apply(null,buf)}recs=parseTSV(tx);if(!recs)return;if(!recs.length){toast('Header read OK but no PO lines found - check the export scope/filters');return}}DATA=recs;try{localStorage.removeItem('mtc_cloud_data')}catch(err){}IMPORT_D=f.name+' (imported '+dstr(TODAY)+')';try{localStorage.setItem('mtc_data_v1',JSON.stringify({d:IMPORT_D,name:f.name,kind:isX?'xlsx':'text',payload:isX?b64(buf):new TextDecoder('utf-8').decode(buf)}))}catch(err){}refreshAll();toast('Dashboard updated: '+recs.length+' lines from '+f.name);e.target.value=''};rd.readAsArrayBuffer(f)});
+refreshAll();renderCustomChips();try{renderStatus(($('sq').value||'').trim().toLowerCase());}catch(e){}$('sq').addEventListener('input',e=>renderStatus(e.target.value.trim().toLowerCase()));(function(){const need=['view-dash','view-status','navDash','navStatus','sttable','stlist','sq','fqStatus','fqVendor','mSort','fqPlant','newSt','customChips','toast','subtitle','followups','dynStats','srcfoot','spend','vendors','gauge','folsub'];const miss=need.filter(id=>!document.getElementById(id));if(miss.length)toast('Page incomplete - missing: '+miss.join(', ')+'. Hard-refresh (Ctrl+Shift+R)')})();
+</script>
+<script type="module">
+import { schnorr, hexToBytes, bytesToHex } from 'https://cdn.jsdelivr.net/npm/@noble/secp256k1@1.7.2/+esm';
+const CLOUD={relays:['wss://nos.lol','wss://relay.primal.net','wss://relay.damus.io'],pub:'411cb53177be329894133829b4d2a0e157878fd90115db472193e42862a9c8da',priv:'7d8a23d0ec43ae6caccb295534219c70c54846fa20f476b612577074a27c209f',dtag:'mtc-pdash-c7f82ae6',kind:30078,pollMs:60000,timeoutMs:9000};
+let cloudTs=0,dirty=false,pushBusy=false,pushTimer=null;
+function badgeEl(){try{return document.getElementById('syncBadge')}catch(e){return null}}
+function setBadge(mode,text){try{const b=badgeEl();if(!b)return;b.className=('sync '+mode).replace(/\s+$/,'');b.textContent=text}catch(e){}}
+function b64enc(u8){let s='';for(let i=0;i<u8.length;i+=8192){s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192))}return btoa(s)}
+function b64dec(s){const bin=atob(s);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return u8}
+async function packBody(str){try{if(typeof CompressionStream!=='undefined'){const cs=new CompressionStream('gzip');const w=cs.writable.getWriter();w.write(new TextEncoder().encode(str));w.close();const buf=await new Response(cs.readable).arrayBuffer();return 'z:'+b64enc(new Uint8Array(buf))}}catch(e){}try{return 'b:'+b64enc(new TextEncoder().encode(str))}catch(e2){return 'j:'+str}}
+async function unpackBody(body){try{if(!body)return null;if(body.indexOf('z:')===0){const ds=new DecompressionStream('gzip');const w=ds.writable.getWriter();w.write(b64dec(body.slice(2)));w.close();return await new Response(ds.readable).text()}if(body.indexOf('b:')===0){return new TextDecoder().decode(b64dec(body.slice(2)))}return body}catch(e){return null}}
+function collectState(){let remarks=[];try{remarks=loadRemarks()}catch(e){}let dd=[];try{dd=DATA}catch(e){}let so={};try{so=STOV||{}}catch(e){}let cu=[];try{cu=CUSTOM||[]}catch(e){}return{v:1,updatedAt:Date.now(),data:dd,stov:so,custom:cu,remarks:remarks}}
+function localTs(){try{return +(localStorage.getItem('mtc_cloud_ts')||0)}catch(e){return 0}}
+function setLocalTs(t){try{localStorage.setItem('mtc_cloud_ts',String(t))}catch(e){}}
+function openWs(url){return new Promise(function(resolve){let ws;try{ws=new WebSocket(url)}catch(e){resolve(null);return}const to=setTimeout(function(){try{ws.close()}catch(e){}resolve(null)},CLOUD.timeoutMs);ws.onopen=function(){clearTimeout(to);resolve(ws)};ws.onerror=function(){clearTimeout(to);try{ws.close()}catch(e){}resolve(null)}})}
+function waitOk(ws,id){return new Promise(function(resolve){const to=setTimeout(function(){cleanup();resolve(null)},CLOUD.timeoutMs);function cleanup(){clearTimeout(to);try{ws.removeEventListener('message',onm)}catch(e){}try{ws.removeEventListener('error',onx)}catch(e){}try{ws.removeEventListener('close',onx)}catch(e){}}function onm(ev){let d=null;try{d=JSON.parse(ev.data)}catch(e){return}if(d&&d[0]==='OK'&&d[1]===id){cleanup();resolve(d)}}function onx(){cleanup();resolve(null)}try{ws.addEventListener('message',onm);ws.addEventListener('error',onx);ws.addEventListener('close',onx)}catch(e){cleanup();resolve(null)}})}
+async function fetchFrom(url){
+  const ws=await openWs(url);if(!ws)return{list:[],eose:false};
+  const sub='mtc'+Math.floor(Math.random()*1e9);
+  try{ws.send(JSON.stringify(['REQ',sub,{kinds:[CLOUD.kind],authors:[CLOUD.pub],'#d':[CLOUD.dtag],limit:3}]))}catch(e){try{ws.close()}catch(_){}return{list:[],eose:false}}
+  const out=await new Promise(function(resolve){
+    const msgs=[];let eose=false;
+    const to=setTimeout(function(){cleanup();resolve({list:msgs,eose:eose})},CLOUD.timeoutMs);
+    function cleanup(){clearTimeout(to);try{ws.removeEventListener('message',onm)}catch(e){}}
+    function onm(ev){let d=null;try{d=JSON.parse(ev.data)}catch(e){return}if(d&&d[0]==='EVENT'&&d[2]&&d[2].pubkey===CLOUD.pub){msgs.push(d[2])}if(d&&d[0]==='EOSE'){eose=true;cleanup();resolve({list:msgs,eose:eose})}}
+    try{ws.addEventListener('message',onm)}catch(e){cleanup();resolve({list:msgs,eose:eose})}
+  });
+  try{ws.close()}catch(e){}
+  return out;
+}
+async function sha256hex(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('')}
+async function buildEvent(body){
+  const created=Math.floor(Date.now()/1000);
+  const tags=[['d',CLOUD.dtag]];
+  const canon='[0,"'+CLOUD.pub+'",'+created+','+CLOUD.kind+','+JSON.stringify(tags)+','+JSON.stringify(body)+']';
+  const id=await sha256hex(canon);
+  const sig=bytesToHex(await schnorr.sign(hexToBytes(id),hexToBytes(CLOUD.priv)));
+  return{obj:{id:id,pubkey:CLOUD.pub,created_at:created,kind:CLOUD.kind,tags:tags,content:body,sig:sig},id:id};
+}
+async function publishTo(url,evObj,id){
+  const ws=await openWs(url);if(!ws)return false;
+  try{ws.send(JSON.stringify(['EVENT',evObj]))}catch(e){try{ws.close()}catch(_){}return false}
+  const r=await waitOk(ws,id);
+  try{ws.close()}catch(e){}
+  return !!(r&&r[2]===true);
+}
+function applyRemote(st){
+  if(!st||!Array.isArray(st.data)||!st.data.length)return false;
+  try{
+    DATA=st.data;
+    STOV=(st.stov&&typeof st.stov==='object'&&!Array.isArray(st.stov))?st.stov:{};
+    CUSTOM=Array.isArray(st.custom)?st.custom:[];
+    persistST();saveCustom();
+    try{localStorage.setItem('mtc_remarks_v1',JSON.stringify(Array.isArray(st.remarks)?st.remarks:[]))}catch(e){}
+    try{localStorage.setItem('mtc_cloud_data',JSON.stringify({updatedAt:st.updatedAt||Date.now(),data:st.data}))}catch(e){}
+    try{localStorage.removeItem('mtc_data_v1')}catch(e){}
+    try{IMPORT_D='shared cloud data ('+st.data.length+' lines)'}catch(e){}
+    applyOverrides();refreshAll();renderCustomChips();
+    try{const sq=$('sq');const q=((sq||{value:''}).value||'').trim().toLowerCase();renderStatus(q)}catch(e){}
+    return true;
+  }catch(e){return false}
+}
+async function cloudPush(){
+  if(pushBusy)return;pushBusy=true;setBadge('busy','Saving…');
+  try{
+    const st=collectState();
+    const body=await packBody(JSON.stringify(st));
+    const ev=await buildEvent(body);
+    const results=await Promise.all(CLOUD.relays.map(function(url){return publishTo(url,ev.obj,ev.id)}));
+    let ok=0;for(const r of results){if(r)ok++}
+    if(ok>0){cloudTs=st.updatedAt;setLocalTs(st.updatedAt);dirty=false;setBadge('ok','Synced ✓')}
+    else{setBadge('err','Offline — saved here')}
+  }catch(e){setBadge('err','Offline — saved here')}
+  pushBusy=false;
+}
+function bump(){dirty=true;setBadge('busy','Saving…');try{clearTimeout(pushTimer)}catch(e){}pushTimer=setTimeout(function(){cloudPush()},900)}
+async function cloudPull(quiet){
+  let best=null,alive=false,found=false;
+  try{
+    const all=await Promise.all(CLOUD.relays.map(fetchFrom));
+    for(const r of all){if(!r)continue;if(r.eose)alive=true;for(const ev of r.list){found=true;if(!best||ev.created_at>best.created_at)best=ev}}
+  }catch(e){}
+  if(!best){if(!quiet&&!alive)setBadge('err','Offline — saved here');return{adopted:false,alive:alive,found:found}}
+  let st=null;
+  try{const raw=await unpackBody(best.content);st=JSON.parse(raw)}catch(e){return{adopted:false,alive:alive,found:found}}
+  if(!st||typeof st.updatedAt!=='number')return{adopted:false,alive:alive,found:found};
+  if(st.updatedAt<=cloudTs)return{adopted:false,alive:alive,found:found};
+  if(dirty){cloudPush();return{adopted:false,alive:alive,found:found}}
+  cloudTs=st.updatedAt;setLocalTs(st.updatedAt);
+  if(applyRemote(st)){setBadge('ok','Synced ✓');try{toast('Loaded newer shared data')}catch(e){}return{adopted:true,alive:alive,found:found}}
+  return{adopted:false,alive:alive,found:found};
+}
+async function boot(){
+  setBadge('','Local');
+  cloudTs=localTs();
+  try{
+    const r=await cloudPull(true);
+    if(!r.adopted&&r.alive&&!r.found){
+      let n=0;try{n=DATA.length}catch(e){}
+      if(n>0){await cloudPush()}
+    }
+  }catch(e){}
+  setInterval(function(){cloudPull(true)},CLOUD.pollMs);
+  try{document.addEventListener('visibilitychange',function(){if(!document.hidden)cloudPull(true)})}catch(e){}
+}
+window.Cloudmod={bump:bump,boot:boot,pull:function(){return cloudPull(false)}};
+boot();
+</script>
+</body>
+</html>

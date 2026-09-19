@@ -375,6 +375,19 @@ export default function App() {
               ))}
             </nav>
 
+            <div className="mt-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">Apps — one site</div>
+            <nav className="mt-2 flex flex-col gap-1">
+              <span className="rounded-xl bg-slate-100 px-3.5 py-2.5 text-left text-[13.5px] font-semibold text-slate-900 dark:bg-slate-800 dark:text-white">
+                🏭 Warehouse ★ you are here
+              </span>
+              <a
+                href="./purchase.html"
+                className="rounded-xl px-3.5 py-2.5 text-left text-[13.5px] font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                🛒 Purchase Dashboard
+              </a>
+            </nav>
+
             <div className="mt-6 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-4 text-white shadow-lg">
               <div className="text-[12px] font-bold">Data source</div>
               <div className="mt-1 text-[11.5px] leading-snug text-white/85">
@@ -409,6 +422,9 @@ export default function App() {
               <span className={`live-dot inline-block h-2 w-2 rounded-full ${live ? "bg-white" : "bg-red-500"}`} />
               {live ? "Live ON" : "Go Live"}
             </button>
+            <a href="./purchase.html" title="Open Purchase Dashboard (same site)" className="rounded-2xl border border-emerald-600 bg-white px-3.5 py-2.5 text-sm font-bold text-emerald-700 shadow-sm hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300">
+              🛒 Purchase
+            </a>
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[13px] font-bold text-white">MT</div>
               <div className="hidden sm:block">
