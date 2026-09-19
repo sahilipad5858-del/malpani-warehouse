@@ -147,6 +147,10 @@ const REC_NAMES = ["receipt", "inward", "grn", "received", "receipt qty", "purch
 const CONS_NAMES = ["consumption", "consumption qty", "usage", "issue", "issued", "consumed", "dispatch", "dispatched", "sales", "sale", "utilization", "utilisation", "out qty"];
 const UOM_NAMES = ["uom", "oun", "unit", "uom code", "base uom"];
 const CODE_NAMES = ["material code", "article code", "item code", "product code", "material no", "material number", "mat code", "mat no", "code", "sku"];
+const VENDOR_NAMES = [
+  "vendor name", "supplier name", "supplier", "vendor", "seller",
+  "party", "party name", "manufacturer", "brand", "source",
+];
 
 function findCol(H, names) {
   const clean = names.map(norm).filter(Boolean).sort((a, b) => b.length - a.length);
@@ -179,6 +183,7 @@ function headerScore(H) {
   if (findCol(H, OPEN_NAMES) >= 0) s += 1;
   if (findCol(H, REC_NAMES) >= 0) s += 1;
   if (findCol(H, CONS_NAMES) >= 0) s += 1;
+  if (findCol(H, VENDOR_NAMES) >= 0) s += 1;
   return s;
 }
 
@@ -256,6 +261,7 @@ export function gridToRecords(grid) {
     if (cArt < 0) cArt = guessTextColumn(grid, hi);
     const cPlant = findCol(H, PLANT_NAMES);
     const cUom = findCol(H, UOM_NAMES);
+    const cVendor = findCol(H, VENDOR_NAMES);
     let cCode = H.indexOf("material");
     if (cCode === cArt) cCode = -1;
     if (cCode < 0) cCode = findCol(H, CODE_NAMES);
@@ -273,6 +279,7 @@ export function gridToRecords(grid) {
         out.push({
           date: ds, plant, article: art,
           code: cCode >= 0 ? (row[cCode] || "").trim() : "",
+          vendor: cVendor >= 0 ? (row[cVendor] || "").trim() : "",
           uom: cUom >= 0 ? (row[cUom] || "").trim() : "",
           opening: 0, receipt: 0, cons: 0, closing: parseNum(row[ci]),
         });
@@ -291,6 +298,7 @@ export function gridToRecords(grid) {
   if (cCode < 0) cCode = findCol(H, CODE_NAMES);
   if (cCode === cArt) cCode = -1;
   const cUom = findCol(H, UOM_NAMES);
+  const cVendor = findCol(H, VENDOR_NAMES);
   const cOpen = findCol(H, OPEN_NAMES);
   const cRec = findCol(H, REC_NAMES);
   const cCons = findCol(H, CONS_NAMES);
@@ -302,7 +310,7 @@ export function gridToRecords(grid) {
     else return { error: `Could not find Article/Item column (row ${hi + 1}: ${headerLabel(grid, hi)}). Need: Date | Plant | Article | Closing.` };
   }
   if (cClose < 0) {
-    const skip = new Set([cArt, cDate, cPlant, cCode, cUom, cOpen, cRec, cCons].filter((v) => v >= 0));
+    const skip = new Set([cArt, cDate, cPlant, cCode, cUom, cVendor, cOpen, cRec, cCons].filter((v) => v >= 0));
     const guess = guessNumericColumn(grid, hi, skip);
     if (guess >= 0) cClose = guess;
   }
@@ -325,6 +333,7 @@ export function gridToRecords(grid) {
     out.push({
       date: ds, plant, article: artRaw,
       code: cCode >= 0 ? (row[cCode] || "").trim() : "",
+      vendor: cVendor >= 0 ? (row[cVendor] || "").trim() : "",
       uom: cUom >= 0 ? (row[cUom] || "").trim() : "",
       opening: cOpen >= 0 ? parseNum(row[cOpen]) : 0,
       receipt: cRec >= 0 ? parseNum(row[cRec]) : 0,
@@ -435,8 +444,10 @@ export function computeSummaries(records, cover = 30) {
     const runout = adu > 0.0001 ? new Date(new Date(lastDate + "T00:00:00").getTime() + days * 864e5) : null;
     const totRec = g.reduce((s, r) => s + (+r.receipt || 0), 0);
     const totCons = g.reduce((s, r) => s + (+r.cons || 0), 0);
+    const vendors = [...new Set(g.map((r) => (r.vendor || "").trim()).filter(Boolean))];
     out.push({
       key: k, article: g[0].article, code: g[0].code, uom: g[0].uom || "", plant: g[0].plant,
+      vendor: (latest.vendor || "").trim(), vendors,
       category: categorize(g[0].article),
       latest: stock, latestDate: latest.date, adu, totRec, totCons,
       days, monthly, order,
@@ -507,7 +518,7 @@ export function downloadCSV(filename, rows) {
 }
 
 export const TEMPLATE_CSV =
-  "Date,Plant,Article,Code,UOM,Opening,Receipt,Consumption,Closing\n" +
-  "10-08-2026,Sangamner,Poly Film Family Elaichi 250g,44000260,KG,520,0,38,482\n" +
-  "11-08-2026,Sangamner,Poly Film Family Elaichi 250g,44000260,KG,482,0,41,441\n" +
-  "10-08-2026,Mumbai,CTC Tea Bulk - Grade BP,71002033,KG,1400,200,72,1528\n";
+  "Date,Plant,Article,Code,Vendor,UOM,Opening,Receipt,Consumption,Closing\n" +
+  "10-08-2026,Sangamner,Poly Film Family Elaichi 250g,44000260,Yuva Polyprint & Packaging,KG,520,0,38,482\n" +
+  "11-08-2026,Sangamner,Poly Film Family Elaichi 250g,44000260,Yuva Polyprint & Packaging,KG,482,0,41,441\n" +
+  "10-08-2026,Mumbai,CTC Tea Bulk - Grade BP,71002033,Laxmi Steel - Sangamner,KG,1400,200,72,1528\n";

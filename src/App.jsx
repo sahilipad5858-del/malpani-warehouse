@@ -100,6 +100,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [plantF, setPlantF] = useState("");
   const [catF, setCatF] = useState("");
+  const [vendorF, setVendorF] = useState("");
   const [preset, setPreset] = useState(30);
   const [cover, setCover] = useState(30);
   const [sortK, setSortK] = useState("days");
@@ -158,6 +159,16 @@ export default function App() {
 
   const plants = useMemo(() => [...new Set(summaries.map((r) => r.plant))].sort(), [summaries]);
 
+  const vendors = useMemo(
+    () => [...new Set(summaries.flatMap((r) => r.vendors || (r.vendor ? [r.vendor] : [])))].sort(),
+    [summaries]
+  );
+
+  /* clear vendor filter if it no longer exists in data (same as purchase dashboard) */
+  useEffect(() => {
+    if (vendorF && !vendors.includes(vendorF)) setVendorF("");
+  }, [vendors]);
+
   const from = preset === 0 ? null : shiftDate(lastDate || todayStr(), -(preset - 1));
 
   const scopedRecords = useMemo(
@@ -184,10 +195,11 @@ export default function App() {
       (r) =>
         (!plantF || r.plant === plantF) &&
         (!catF || r.category === catF) &&
-        (!q || r.article.toLowerCase().includes(q) || r.plant.toLowerCase().includes(q) || (r.code || "").toLowerCase().includes(q))
+        (!vendorF || (r.vendors || []).includes(vendorF)) &&
+        (!q || r.article.toLowerCase().includes(q) || r.plant.toLowerCase().includes(q) || (r.code || "").toLowerCase().includes(q) || (r.vendor || "").toLowerCase().includes(q))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [summaries, search, plantF, catF, liveDelta]);
+  }, [summaries, search, plantF, catF, vendorF, liveDelta]);
 
   const sorted = useMemo(() => {
     const L = filtered.slice();
@@ -293,8 +305,8 @@ export default function App() {
 
   const exportTableCSV = () => {
     downloadCSV(`malpani-warehouse-${todayStr()}.csv`, [
-      ["Article", "Plant", "Code", "UOM", "Category", "Stock", "PerDayUse", "DaysCover", "MonthlyNeed", "ToOrder", "RunoutBy", "Status"],
-      ...sorted.map((r) => [r.article, r.plant, r.code, r.uom, r.category, Math.round(r.latest), r.adu.toFixed(1), r.days > 9000 ? "INF" : r.days.toFixed(1), Math.round(r.monthly), r.order, r.runout, r.status]),
+      ["Article", "Plant", "Code", "Vendor", "UOM", "Category", "Stock", "PerDayUse", "DaysCover", "MonthlyNeed", "ToOrder", "RunoutBy", "Status"],
+      ...sorted.map((r) => [r.article, r.plant, r.code, r.vendor || "", r.uom, r.category, Math.round(r.latest), r.adu.toFixed(1), r.days > 9000 ? "INF" : r.days.toFixed(1), Math.round(r.monthly), r.order, r.runout, r.status]),
     ]);
     showToast("CSV exported.");
   };
@@ -302,8 +314,8 @@ export default function App() {
   const exportPlanCSV = () => {
     const need = sorted.filter((r) => r.order > 0);
     downloadCSV(`malpani-purchase-plan-${todayStr()}.csv`, [
-      ["Article", "Plant", "Code", "UOM", "Stock", "DaysCover", "MonthlyNeed", "ToOrder", "RunoutBy"],
-      ...need.map((r) => [r.article, r.plant, r.code, r.uom, Math.round(r.latest), r.days > 9000 ? "INF" : r.days.toFixed(1), Math.round(r.monthly), r.order, r.runout]),
+      ["Article", "Plant", "Code", "Vendor", "UOM", "Stock", "DaysCover", "MonthlyNeed", "ToOrder", "RunoutBy"],
+      ...need.map((r) => [r.article, r.plant, r.code, r.vendor || "", r.uom, Math.round(r.latest), r.days > 9000 ? "INF" : r.days.toFixed(1), Math.round(r.monthly), r.order, r.runout]),
     ]);
     showToast(`Purchase plan exported (${need.length} lines).`);
   };
@@ -578,6 +590,13 @@ export default function App() {
                     </select>
                   </div>
                   <div>
+                    <div className="mb-1 text-[11px] font-bold text-slate-500">Vendor</div>
+                    <select value={vendorF} onChange={(e) => setVendorF(e.target.value)} className="max-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800" title="Filter by vendor (from Vendor column in Excel)">
+                      <option value="">All vendors ({vendors.length})</option>
+                      {vendors.map((v) => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div>
                     <div className="mb-1 text-[11px] font-bold text-slate-500">Target cover (days)</div>
                     <input type="number" min={7} max={120} value={cover} onChange={(e) => setCover(e.target.value)} className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800" />
                   </div>
@@ -611,7 +630,7 @@ export default function App() {
                               <Avatar name={r.article} cat={r.category} />
                               <div className="min-w-0">
                                 <div className="truncate font-bold">{r.article}</div>
-                                <div className="truncate text-[11px] text-slate-400">{r.plant}{r.code ? ` · ${r.code}` : ""}{r.uom ? ` · ${r.uom}` : ""} · {r.category}</div>
+                                <div className="truncate text-[11px] text-slate-400">{r.plant}{r.code ? ` · ${r.code}` : ""}{r.uom ? ` · ${r.uom}` : ""}{r.vendor ? ` · ${r.vendor}` : ""} · {r.category}</div>
                               </div>
                             </div>
                           </td>
@@ -667,7 +686,7 @@ export default function App() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-[16px] font-extrabold">{detail.article}</h3>
-                <p className="text-[12px] text-slate-500">{detail.plant}{detail.code ? ` · ${detail.code}` : ""}{detail.uom ? ` · ${detail.uom}` : ""} · {detail.category}</p>
+                <p className="text-[12px] text-slate-500">{detail.plant}{detail.code ? ` · ${detail.code}` : ""}{detail.vendor ? ` · ${detail.vendor}` : ""}{detail.uom ? ` · ${detail.uom}` : ""} · {detail.category}</p>
               </div>
               <button onClick={() => setDetailKey(null)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-[12.5px] font-bold dark:border-slate-700">Close</button>
             </div>
@@ -768,7 +787,7 @@ function HelpView({ onTemplate }) {
   return (
     <div className="mt-4 grid gap-4 lg:grid-cols-2">
       <Card title="Option A — daily rows (recommended, LONG format)" sub="Row 1 = headers (order doesn't matter, extra columns ignored). Minimum that works: Date | Plant | Article | Closing.">
-        <code className="mt-2 block overflow-auto rounded-xl bg-slate-50 p-3 text-[12px] dark:bg-slate-800">Date · Plant · Short Text (name) · Material (number) · UOM · Opening · Receipt/Inward · Consumption/Usage/Issue · Closing/Stock</code>
+        <code className="mt-2 block overflow-auto rounded-xl bg-slate-50 p-3 text-[12px] dark:bg-slate-800">Date · Plant · Short Text (name) · Material (number) · Vendor/Supplier · UOM · Opening · Receipt/Inward · Consumption/Usage/Issue · Closing/Stock</code>
         <p className="mt-2 text-[12.5px] leading-relaxed text-slate-500">SAP style works directly: name from <b>Short Text</b>, number from <b>Material</b>. Dates accept DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD and Excel serials. Upload one file every working day — holidays need no file.</p>
         <button onClick={onTemplate} className="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-[12.5px] font-bold text-white dark:bg-white dark:text-slate-900">Download Template</button>
       </Card>
