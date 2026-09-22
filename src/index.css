@@ -8,11 +8,53 @@
 
 html {
   font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* ---------- Android-friendly touch defaults ---------- */
+:root {
+  color-scheme: light dark;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+button, a, select, input[type="button"], input[type="submit"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 100dvh helper (falls back to vh on old Android WebView) */
+.min-h-dscreen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* smooth momentum scroll for wide tables on Android */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* bottom nav safe-area */
+.safe-bottom {
+  padding-bottom: calc(0.5rem + var(--sab));
+}
+
+/* Prevent Android Chrome auto-zoom on focus: inputs >= 16px on phones */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  /* roomier tap targets on phones */
+  button, select {
+    min-height: 44px;
+  }
 }
 
 /* slim scrollbars */

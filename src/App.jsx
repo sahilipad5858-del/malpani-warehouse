@@ -350,8 +350,8 @@ export default function App() {
   const PIE_COLORS = ["#10b981", "#8b5cf6", "#f59e0b", "#ef4444", "#0ea5e9", "#6366f1"];
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="flex min-h-screen">
+    <div className="min-h-dscreen overflow-x-clip bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="min-h-dscreen flex">
         {/* ---------- sidebar ---------- */}
         <aside className={`no-print fixed inset-y-0 left-0 z-40 w-64 transform border-r border-slate-200/70 bg-white/95 backdrop-blur transition-transform dark:border-slate-800 dark:bg-slate-900/95 lg:static lg:translate-x-0 ${sideOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="flex h-full flex-col p-5">
@@ -411,14 +411,14 @@ export default function App() {
         {sideOpen && <div className="no-print fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => setSideOpen(false)} />}
 
         {/* ---------- main ---------- */}
-        <div className="print-full mx-auto w-full max-w-[1280px] flex-1 px-4 pb-16 pt-4 sm:px-6">
+        <div className="print-full mx-auto w-full max-w-[1280px] min-w-0 flex-1 px-4 pb-28 pt-4 sm:px-6 lg:pb-16">
           {/* header — single webpage shell; warehouse search/live hidden on Purchase tab */}
-          <header className="no-print flex flex-wrap items-center gap-3">
-            <button onClick={() => setSideOpen(true)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-slate-700 dark:bg-slate-900 lg:hidden">☰</button>
+          <header className="no-print flex flex-wrap items-center gap-2 sm:gap-3">
+            <button onClick={() => setSideOpen(true)} aria-label="Open menu" className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-bold dark:border-slate-700 dark:bg-slate-900 lg:hidden">☰</button>
             {view !== "purchase" && (
-            <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="order-first flex min-w-0 w-full flex-1 basis-full items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:order-none sm:w-auto sm:basis-auto sm:min-w-[200px]">
               <span className="text-slate-400">⌕</span>
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search article / plant / code — e.g. Elaichi, Sangamner" className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-slate-400" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search article / plant / code" inputMode="search" enterKeyHint="search" autoComplete="off" className="w-full min-w-0 bg-transparent text-[16px] outline-none placeholder:text-slate-400 sm:text-[13.5px]" />
             </div>
             )}
             {view === "purchase" && (
@@ -426,16 +426,16 @@ export default function App() {
               Single page · use search inside the Purchase frame below
             </div>
             )}
-            <button onClick={() => setDark(!dark)} title="Toggle dark mode" className="rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <button onClick={() => setDark(!dark)} title="Toggle dark mode" className="min-h-[44px] rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold shadow-sm dark:border-slate-700 dark:bg-slate-900">
               {dark ? "☀ Light" : "◑ Dark"}
             </button>
             {view !== "purchase" && (
-            <button onClick={() => { setLive(!live); if (!live) showToast("Live simulation ON — consumption ticks every 4s."); }} className={`flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${live ? "bg-red-600 text-white" : "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"}`}>
+            <button onClick={() => { setLive(!live); if (!live) showToast("Live simulation ON — consumption ticks every 4s."); }} className={`flex min-h-[44px] items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${live ? "bg-red-600 text-white" : "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"}`}>
               <span className={`live-dot inline-block h-2 w-2 rounded-full ${live ? "bg-white" : "bg-red-500"}`} />
               {live ? "Live ON" : "Go Live"}
             </button>
             )}
-            <button onClick={() => setView("purchase")} title="Open Purchase Dashboard in the same page" className={`rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${view === "purchase" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white" : "border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"}`}>
+            <button onClick={() => setView("purchase")} title="Open Purchase Dashboard in the same page" className={`min-h-[44px] rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${view === "purchase" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white" : "border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"}`}>
               🛒 Purchase
             </button>
             <div className="flex items-center gap-2">
@@ -504,7 +504,8 @@ export default function App() {
               <iframe
                 src="./purchase.html?embed=1"
                 title="Purchase Dashboard — same page"
-                style={{ width: "100%", height: "calc(100vh - 220px)", minHeight: 640, border: 0, display: "block", background: "#F5F7F5" }}
+                allowFullScreen
+                style={{ width: "100%", height: "calc(100dvh - 240px)", minHeight: 560, border: 0, display: "block", background: "#F5F7F5" }}
               />
             </section>
           )}
@@ -553,7 +554,7 @@ export default function App() {
                   <section className="mt-4 grid gap-4 xl:grid-cols-5">
                     <div className="xl:col-span-3">
                       <Card title="Receipt vs consumption trend" sub={`Daily inward vs usage · ${from ? dstr(from) + " → " + dstr(lastDate) : "all history"}`}>
-                        <div className="h-[260px]">
+                        <div className="h-[220px] sm:h-[260px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={trend} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                               <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
@@ -570,7 +571,7 @@ export default function App() {
                     </div>
                     <div className="xl:col-span-2">
                       <Card title="Plant-wise stock share" sub="Closing stock split across warehouses">
-                        <div className="h-[260px]">
+                        <div className="h-[220px] sm:h-[260px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie data={plantShare} dataKey="value" nameKey="name" innerRadius={58} outerRadius={92} paddingAngle={3} strokeWidth={0}>
@@ -589,7 +590,7 @@ export default function App() {
                   <section className="mt-4 grid gap-4 xl:grid-cols-5">
                     <div className="xl:col-span-3">
                       <Card title="Stock by category" sub="Packing Material vs Tea & Flavours — auto-detected from article names">
-                        <div className="h-[240px]">
+                        <div className="h-[210px] sm:h-[240px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={catStock} margin={{ top: 8, right: 8, left: -8, bottom: 0 }} layout="vertical">
                               <CartesianGrid stroke={gridColor} strokeDasharray="3 3" horizontal={false} />
@@ -629,41 +630,85 @@ export default function App() {
 
               {/* filters + table */}
               <section className="mt-4 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-700/60 dark:bg-slate-900">
-                <div className="flex flex-wrap items-end gap-3">
-                  <div>
+                <div className="flex flex-wrap items-end gap-2 sm:gap-3">
+                  <div className="min-w-0 flex-1 basis-[46%] sm:flex-none sm:basis-auto">
                     <div className="mb-1 text-[11px] font-bold text-slate-500">Plant</div>
-                    <select value={plantF} onChange={(e) => setPlantF(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800">
+                    <select value={plantF} onChange={(e) => setPlantF(e.target.value)} className="min-h-[44px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800 sm:w-auto">
                       <option value="">All plants ({plants.length})</option>
                       {plants.map((p) => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1 basis-[46%] sm:flex-none sm:basis-auto">
                     <div className="mb-1 text-[11px] font-bold text-slate-500">Category</div>
-                    <select value={catF} onChange={(e) => setCatF(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800">
+                    <select value={catF} onChange={(e) => setCatF(e.target.value)} className="min-h-[44px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800 sm:w-auto">
                       <option value="">All categories</option>
                       <option>Tea & Flavours</option>
                       <option>Packing Material</option>
                     </select>
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1 basis-[46%] sm:flex-none sm:basis-auto">
                     <div className="mb-1 text-[11px] font-bold text-slate-500">Vendor</div>
-                    <select value={vendorF} onChange={(e) => setVendorF(e.target.value)} className="max-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800" title="Filter by vendor (from Vendor column in Excel)">
+                    <select value={vendorF} onChange={(e) => setVendorF(e.target.value)} className="min-h-[44px] w-full max-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800 sm:w-auto" title="Filter by vendor (from Vendor column in Excel)">
                       <option value="">All vendors ({vendors.length})</option>
                       {vendors.map((v) => <option key={v} value={v}>{v}</option>)}
                     </select>
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1 basis-[46%] sm:flex-none sm:basis-auto">
                     <div className="mb-1 text-[11px] font-bold text-slate-500">Target cover (days)</div>
-                    <input type="number" min={7} max={120} value={cover} onChange={(e) => setCover(e.target.value)} className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800" />
+                    <input type="number" min={7} max={120} inputMode="numeric" value={cover} onChange={(e) => setCover(e.target.value)} className="min-h-[44px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12.5px] font-semibold dark:border-slate-700 dark:bg-slate-800 sm:w-28" />
                   </div>
                   <div className="no-print ml-auto flex gap-2">
-                    <button onClick={exportTableCSV} className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12.5px] font-bold hover:border-emerald-500 dark:border-slate-700">Export CSV</button>
-                    <button onClick={() => window.print()} className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12.5px] font-bold hover:border-emerald-500 dark:border-slate-700">PDF</button>
+                    <button onClick={exportTableCSV} className="min-h-[44px] rounded-xl border border-slate-200 px-3.5 py-2 text-[12.5px] font-bold hover:border-emerald-500 dark:border-slate-700">Export CSV</button>
+                    <button onClick={() => window.print()} className="min-h-[44px] rounded-xl border border-slate-200 px-3.5 py-2 text-[12.5px] font-bold hover:border-emerald-500 dark:border-slate-700">PDF</button>
                   </div>
                 </div>
-                <p className="mt-2 text-[11.5px] text-slate-400">Showing {sorted.length} of {summaries.length} lines · click column heads to sort · click a row for day-wise detail</p>
+                <p className="mt-2 text-[11.5px] text-slate-400">Showing {sorted.length} of {summaries.length} lines · tap a card / row for day-wise detail</p>
 
-                <div className="mt-3 overflow-auto rounded-xl border border-slate-100 dark:border-slate-800" style={{ maxHeight: 460 }}>
+                {/* Mobile cards (Android-friendly) — replaces wide table under md */}
+                <div className="mt-3 space-y-2 md:hidden">
+                  {sorted.slice(0, 100).map((r) => (
+                    <button
+                      key={r.key}
+                      onClick={() => setDetailKey(r.key)}
+                      className={`w-full rounded-2xl border p-3.5 text-left shadow-sm transition active:scale-[0.99] ${r.status === "Critical" || r.status === "Stockout" ? "border-red-200 bg-red-50/60 dark:border-red-500/30 dark:bg-red-500/5" : r.status === "Low" ? "border-amber-200 bg-amber-50/50 dark:border-amber-500/30 dark:bg-amber-500/5" : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Avatar name={r.article} cat={r.category} />
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[14px] font-bold leading-tight">{r.article}</div>
+                          <div className="truncate text-[11.5px] text-slate-500 dark:text-slate-400">{r.plant}{r.code ? ` · ${r.code}` : ""}{r.uom ? ` · ${r.uom}` : ""}</div>
+                        </div>
+                        <StatusPill s={r.status} />
+                      </div>
+                      <div className="mt-2.5 grid grid-cols-4 gap-2 text-center">
+                        <div className="rounded-xl bg-slate-50 px-1 py-1.5 dark:bg-slate-800/70">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Stock</div>
+                          <div className="text-[14px] font-extrabold tabular-nums">{fmt(r.latest)}</div>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 px-1 py-1.5 dark:bg-slate-800/70">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Days</div>
+                          <div className="text-[14px] font-extrabold tabular-nums" style={{ color: daysColor(r.days) }}>{r.days > 9000 ? "∞" : fmt(r.days, 1)}</div>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 px-1 py-1.5 dark:bg-slate-800/70">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Need/mo</div>
+                          <div className="text-[14px] font-extrabold tabular-nums">{fmt(r.monthly)}</div>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 px-1 py-1.5 dark:bg-slate-800/70">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Order</div>
+                          <div className="text-[14px] font-extrabold tabular-nums">{r.order > 0 ? fmt(r.order) : "–"}</div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                  {!sorted.length && (
+                    <div className="rounded-2xl border border-slate-200 px-3 py-10 text-center text-slate-400 dark:border-slate-700">No lines match — clear search/filters or import Excel.</div>
+                  )}
+                  {sorted.length > 100 && (
+                    <div className="px-1 py-1 text-center text-[11.5px] text-slate-400">Showing first 100 of {sorted.length} — use search/filters to narrow, or Export CSV for the full list.</div>
+                  )}
+                </div>
+
+                <div className="touch-scroll mt-3 hidden overflow-auto rounded-xl border border-slate-100 dark:border-slate-800 md:block" style={{ maxHeight: 460 }}>
                   <table className="w-full min-w-[1080px] border-collapse text-[12.5px]">
                     <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800">
                       <tr className="text-left text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-300">
@@ -735,16 +780,16 @@ export default function App() {
         </div>
       </div>
 
-      {/* detail modal */}
+      {/* detail modal — bottom sheet on Android */}
       {detail && (
-        <div className="no-print fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDetailKey(null)}>
-          <div className="max-h-[88vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-6 dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
+        <div className="no-print fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4" onClick={() => setDetailKey(null)}>
+          <div className="max-h-[92dvh] w-full max-w-3xl overflow-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] dark:bg-slate-900 sm:rounded-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-[16px] font-extrabold">{detail.article}</h3>
                 <p className="text-[12px] text-slate-500">{detail.plant}{detail.code ? ` · ${detail.code}` : ""}{detail.vendor ? ` · ${detail.vendor}` : ""}{detail.uom ? ` · ${detail.uom}` : ""} · {detail.category}</p>
               </div>
-              <button onClick={() => setDetailKey(null)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-[12.5px] font-bold dark:border-slate-700">Close</button>
+              <button onClick={() => setDetailKey(null)} className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 px-3 py-1.5 text-[12.5px] font-bold dark:border-slate-700">Close</button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <StatBox k="Stock" v={fmt(detail.latest)} />
@@ -775,12 +820,35 @@ export default function App() {
         </div>
       )}
 
-      {/* toast */}
+      {/* toast — floats above bottom nav on Android */}
       {toast && (
-        <div className="no-print fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-xl bg-slate-900 px-5 py-3 text-[13px] font-semibold text-white shadow-2xl dark:bg-white dark:text-slate-900">
+        <div className="no-print fixed bottom-24 left-1/2 z-[60] w-max max-w-[92vw] -translate-x-1/2 rounded-xl bg-slate-900 px-5 py-3 text-center text-[13px] font-semibold text-white shadow-2xl dark:bg-white dark:text-slate-900 lg:bottom-6">
           {toast}
         </div>
       )}
+
+      {/* Android thumb-friendly bottom nav */}
+      <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/95 px-2 pt-1.5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 lg:hidden" aria-label="Primary">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+          {[
+            { id: "overview", label: "Home", icon: "🏠" },
+            { id: "inventory", label: "Stock", icon: "📦" },
+            { id: "purchase", label: "Buy", icon: "🛒" },
+            { id: "activity", label: "Data", icon: "📊" },
+            { id: "help", label: "Help", icon: "❓" },
+          ].map((n) => (
+            <button
+              key={n.id}
+              onClick={() => { setView(n.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              aria-current={view === n.id ? "page" : undefined}
+              className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-bold transition ${view === n.id ? "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}`}
+            >
+              <span className="text-[19px] leading-none">{n.icon}</span>
+              {n.label}
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
