@@ -112,6 +112,12 @@ export default function App() {
   const [uploadMode, setUploadMode] = useState("merge");
   const [toast, showToast] = useToast();
   const fileRef = useRef(null);
+  const [sync, setSync] = useState({ mode: "local", text: "Local" });
+  const cloudRef = useRef(null);
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
+  const metaRef = useRef(meta);
+  metaRef.current = meta;
 
   /* load LAST SAVED EXCEL DATA (or demo on first run) */
   useEffect(() => {
@@ -132,6 +138,58 @@ export default function App() {
     document.documentElement.classList.toggle("dark", dark);
     try { localStorage.setItem(LS_THEME, dark ? "dark" : "light"); } catch { /* noop */ }
   }, [dark]);
+
+  /* shared relay-cloud sync (same system as the Purchase page):
+     upload Excel on PC → open the link on mobile → data arrives automatically */
+  useEffect(() => {
+    let alive = true;
+    let api = null;
+    (async () => {
+      try {
+        const mod = await import("./lib/cloud");
+        if (!alive) return;
+        api = mod.createCloudSync({
+          relays: mod.TEAM_CLOUD.relays,
+          pub: mod.TEAM_CLOUD.pub,
+          priv: mod.TEAM_CLOUD.priv,
+          dtag: mod.WAREHOUSE_DTAG,
+          tsKey: mod.WAREHOUSE_TS_KEY,
+          onStatus: (mode, text) => { if (alive) setSync({ mode, text }); },
+          collect: () => {
+            const recs = recordsRef.current;
+            const m = metaRef.current;
+            if (!recs || !recs.length || (m && m.isDemo)) {
+              return { updatedAt: Date.now(), seedable: false, empty: true, records: [], meta: {} };
+            }
+            return { v: 1, updatedAt: Date.now(), seedable: true, records: recs, meta: m };
+          },
+          apply: (st) => {
+            if (!st) return false;
+            if (st.cleared) {
+              try { localStorage.removeItem("mtc_warehouse_records_v1"); localStorage.removeItem("mtc_warehouse_meta_v1"); } catch { /* noop */ }
+              const demo = genDemo();
+              setRecords(demo);
+              setMeta({ source: "demo", isDemo: true, at: new Date().toLocaleString() });
+              setLiveDelta({});
+              setFeed((f) => [{ t: new Date().toLocaleString(), msg: "Cloud sync — data was cleared on another device. Demo reloaded." }, ...f].slice(0, 30));
+              return true;
+            }
+            if (!Array.isArray(st.records) || !st.records.length) return false;
+            const m = { ...(st.meta || {}), isDemo: false };
+            setRecords(st.records);
+            setMeta(m);
+            saveLibrary(st.records, m);
+            setLiveDelta({});
+            setFeed((f) => [{ t: new Date().toLocaleString(), msg: `Cloud sync — loaded newer shared data (${st.records.length.toLocaleString("en-IN")} rows).` }, ...f].slice(0, 30));
+            return true;
+          },
+        });
+        cloudRef.current = api;
+        api.boot();
+      } catch { /* stay local-only */ }
+    })();
+    return () => { alive = false; try { api && api.stop(); } catch { /* noop */ } cloudRef.current = null; };
+  }, []);
 
   /* live simulation: random consumption ticks */
   useEffect(() => {
@@ -239,6 +297,9 @@ export default function App() {
 
   const detail = detailKey ? summaries.map(adj).find((r) => r.key === detailKey) : null;
 
+  const syncDot = sync.mode === "synced" ? "bg-emerald-500" : sync.mode === "saving" ? "bg-amber-500 live-dot" : sync.mode === "offline" ? "bg-red-500" : "bg-slate-400";
+  const syncLabel = sync.mode === "synced" ? "Synced" : sync.mode === "saving" ? "Saving…" : sync.mode === "offline" ? "Offline · saved here" : "Local";
+
   const tickColor = dark ? "#94a3b8" : "#64748b";
   const gridColor = dark ? "#1e293b" : "#e2e8f0";
 
@@ -247,6 +308,7 @@ export default function App() {
     setRecords(recs);
     setMeta(m);
     saveLibrary(recs, m);
+    try { cloudRef.current && cloudRef.current.bump(); } catch { /* offline — stays local */ }
   };
 
   const applyIncoming = (incoming, fileName) => {
@@ -337,6 +399,7 @@ export default function App() {
     setRecords(demo);
     setMeta({ source: "demo", isDemo: true, at: new Date().toLocaleString() });
     setLiveDelta({});
+    try { cloudRef.current && cloudRef.current.pushState({ v: 1, updatedAt: Date.now(), cleared: true, records: [], meta: { source: "cleared", at: new Date().toLocaleString() } }); } catch { /* noop */ }
     showToast("Cleared — demo reloaded.");
   };
 
@@ -438,6 +501,10 @@ export default function App() {
             <button onClick={() => setView("purchase")} title="Open Purchase Dashboard in the same page" className={`min-h-[44px] rounded-2xl px-3.5 py-2.5 text-sm font-bold shadow-sm ${view === "purchase" ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white" : "border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"}`}>
               🛒 Purchase
             </button>
+            <span title={sync.mode === "local" ? "Stored in this browser — syncs to your other devices on first import" : `Cloud sync: ${sync.text}`} className="flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-bold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+              <span className={`inline-block h-2 w-2 rounded-full ${syncDot}`} />
+              {syncLabel}
+            </span>
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[13px] font-bold text-white">MT</div>
               <div className="hidden sm:block">
@@ -518,6 +585,7 @@ export default function App() {
                   <Row k="Last import" v={meta.at || "—"} />
                   <Row k="Rows stored" v={records.length.toLocaleString("en-IN")} />
                   <Row k="Lines tracked" v={String(summaries.length)} />
+                  <Row k="Cloud sync" v={sync.mode === "synced" ? "Synced across devices" : sync.mode === "saving" ? "Saving…" : sync.mode === "offline" ? "Offline — syncs when online" : "Local — syncs on first import"} />
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button onClick={() => fileRef.current?.click()} className="rounded-xl bg-slate-900 px-4 py-2 text-[12.5px] font-bold text-white dark:bg-white dark:text-slate-900">+ Add Excel</button>
                     <button onClick={exportTableCSV} className="rounded-xl border border-slate-200 px-4 py-2 text-[12.5px] font-bold dark:border-slate-700">Export merged CSV</button>
