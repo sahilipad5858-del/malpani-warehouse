@@ -13,6 +13,8 @@ import {
 
 /* ---------------- small atoms ---------------- */
 
+const LOGO = `${import.meta.env.BASE_URL}logo.png`;
+
 const GRAD = {
   emerald: "from-emerald-500 to-teal-500",
   violet: "from-violet-500 to-purple-500",
@@ -419,7 +421,7 @@ export default function App() {
         <aside className={`no-print fixed inset-y-0 left-0 z-40 w-64 transform border-r border-slate-200/70 bg-white/95 backdrop-blur transition-transform dark:border-slate-800 dark:bg-slate-900/95 lg:static lg:translate-x-0 ${sideOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="flex h-full flex-col p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-lg font-extrabold text-white shadow-lg">M</div>
+              <img src={LOGO} alt="Malpani logo" className="h-11 w-11 flex-none rounded-2xl bg-black object-contain shadow-lg" />
               <div>
                 <div className="text-[14px] font-extrabold leading-tight">Malpani Tea Corp.</div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">Warehouse Dashboard</div>
@@ -506,7 +508,7 @@ export default function App() {
               {syncLabel}
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[13px] font-bold text-white">MT</div>
+              <img src={LOGO} alt="Malpani logo" className="h-10 w-10 flex-none rounded-xl bg-black object-contain" />
               <div className="hidden sm:block">
                 <div className="text-[13px] font-bold leading-tight">Warehouse Team</div>
                 <div className="text-[11px] text-slate-500">Malpani Tea Corp.</div>
